@@ -3,6 +3,8 @@
 Terminal em abas (Serial, SSH, PowerShell, CMD, Azure, GCP e Web/iDRAC) com evidências padronizadas,
 relatório PDF e sessão ao vivo. **DASSH IT Services.**
 
+**➡ Página de instalação (passo a passo): https://claudiosirimarco.github.io/dassh-console-download/**
+
 ## ⬇ Baixar (Windows 10/11, 64 bits)
 
 **[Baixar o instalador mais recente](https://github.com/ClaudioSirimarco/dassh-console-download/releases/latest)**
