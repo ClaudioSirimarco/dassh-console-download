@@ -153,8 +153,9 @@ $v("form").onsubmit = async (e) => {
   if (cod.length !== 12) return msgV("O código tem 12 caracteres (ex.: ABCD-EFGH-JKLM).", true);
   $v("#v-btn").disabled = true; msgV("Conectando com segurança…");
   lsSet("dassh-nome", nome); lsSet("dassh_nome_ok", "1"); NOME = nome;
-  for (const id of [...abas.keys()]) if (!abas.get(id).conectado) fecharAba(id);   // tira a aba de boas-vindas
   abaRemota = await entrarSessao(cod);
+  // a aba remota fica sozinha (some a "Nova aba" de boas-vindas)
+  if (abaRemota) for (const id of [...abas.keys()]) if (id !== abaRemota.id && !abas.get(id).conectado) fecharAba(id);
   if (!abaRemota) { $v("#v-btn").disabled = false; return msgV("Não foi possível conectar. Verifique a internet.", true); }
   if (!abaRemota.conectado) { const r = abaRemota; abaRemota = null; fecharAba(r.id); $v("#v-btn").disabled = false; return msgV("Não foi possível entrar com esse código.", true); }
   msgV("🔐 Pedido enviado. Aguardando quem compartilhou aprovar a sua entrada…");
