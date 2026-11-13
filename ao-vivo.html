@@ -28,6 +28,12 @@
   #vidro button:disabled { opacity: .55; cursor: wait; }
   #v-msg { margin-top: 12px; min-height: 22px; font-size: 13.5px; color: #f6c86b; } #v-msg.erro { color: #ff7b72; }
   #vidro small { display: block; margin-top: 14px; color: #93a1ad; font-size: 12px; border-top: 1px solid #2a3a48; padding-top: 12px; }
+  .v-voltar { display: inline-block; margin-bottom: 14px; color: #5ee0b5; text-decoration: none; font-size: 13.5px; }
+  .v-voltar:hover { text-decoration: underline; }
+  body.web .marca { cursor: pointer !important; }
+  #btn-site { position: fixed; right: 14px; bottom: 12px; z-index: 120; padding: 7px 12px; border-radius: 9px; font: 600 12.5px system-ui, sans-serif;
+    color: #e6edf3; background: rgba(20,29,38,.92); border: 1px solid #2a3a48; text-decoration: none; }
+  #btn-site:hover { border-color: #00c896; }
 </style>
 <link rel="stylesheet" href="app/vendor/xterm.css">
 <link rel="stylesheet" href="app/app.css">
@@ -386,6 +392,7 @@
 <script src="app/app.js"></script>
 <script src="app/demo.js"></script>
 <div id="vidro"><form autocomplete="off">
+  <a class="v-voltar" href="./">← Página do DASSH Console</a>
   <h1>📡 Sessão ao vivo</h1>
   <p>Digite o código do convite. A sessão só abre depois que quem compartilhou <b>aprovar</b> a sua entrada.</p>
   <label for="v-nome">Seu nome</label><input id="v-nome" maxlength="40" placeholder="Ex.: Ana — NOC" required>
@@ -394,6 +401,7 @@
   <div id="v-msg"></div>
   <small>🔒 Criptografia de ponta a ponta (AES-256-GCM + X25519). Você entra como observador.</small>
 </form></div>
+<a id="btn-site" href="./" title="Voltar para a página do produto (sai da sessão)">← Página do DASSH Console</a>
 <div id="aviso-web">👁 Você está acompanhando pelo navegador. Aqui só o shell compartilhado responde — o resto fica com quem compartilhou.</div>
 <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
 <script type="module" src="app/ponte-web.js"></script>

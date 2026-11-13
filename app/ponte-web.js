@@ -162,6 +162,7 @@ $v("form").onsubmit = async (e) => {
 // tudo que não é do shell compartilhado fica travado (só olhar)
 let tAviso;
 document.addEventListener("click", (e) => {
+  if (e.target.closest(".marca")) { e.stopPropagation(); location.href = "./"; return; }   // logo = página do produto
   if (!e.target.closest(".topo, .lateral, #nova-aba, #btn-compartilhar, #btn-historico, .aba .rec")) return;
   e.stopPropagation(); e.preventDefault();
   const el = document.getElementById("aviso-web"); el.classList.add("on");
