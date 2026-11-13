@@ -12,6 +12,22 @@
   #aviso-web { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 200; background: #1b2633; color: #e6edf3;
     border: 1px solid #2f4152; border-radius: 10px; padding: 10px 16px; font: 14px system-ui, sans-serif; opacity: 0; transition: opacity .25s; pointer-events: none; }
   #aviso-web.on { opacity: 1; }
+  body.web .aba .fecha { display: none; }
+  #vidro { position: fixed; inset: 0; z-index: 150; display: grid; place-items: center; padding: 16px;
+    background: rgba(8,12,16,.35); backdrop-filter: blur(14px) saturate(.8); -webkit-backdrop-filter: blur(14px) saturate(.8);
+    transition: opacity .6s ease, backdrop-filter .6s ease; font: 15px/1.5 system-ui, "Segoe UI", sans-serif; color: #e6edf3; }
+  #vidro.aberto { opacity: 0; pointer-events: none; backdrop-filter: blur(0); }
+  #vidro form { width: min(440px, 100%); background: rgba(20,29,38,.88); border: 1px solid #2a3a48; border-radius: 16px; padding: 26px;
+    box-shadow: 0 24px 80px rgba(0,0,0,.55); }
+  #vidro h1 { font-size: 22px; margin: 0 0 6px; } #vidro p { color: #93a1ad; margin: 0 0 14px; font-size: 14px; }
+  #vidro label { display: block; font-size: 12.5px; color: #93a1ad; margin: 12px 0 6px; }
+  #vidro input { width: 100%; box-sizing: border-box; padding: 11px 13px; border-radius: 10px; border: 1px solid #2a3a48; background: #0d141b; color: #e6edf3; font-size: 16px; }
+  #vidro #v-cod { font: 600 21px ui-monospace, Consolas, monospace; letter-spacing: 2px; text-transform: uppercase; text-align: center; }
+  #vidro button { margin-top: 18px; width: 100%; padding: 12px; border: 0; border-radius: 10px; font-weight: 700; font-size: 15.5px; cursor: pointer;
+    background: linear-gradient(135deg, #00c896, #00a07a); color: #04231b; }
+  #vidro button:disabled { opacity: .55; cursor: wait; }
+  #v-msg { margin-top: 12px; min-height: 22px; font-size: 13.5px; color: #f6c86b; } #v-msg.erro { color: #ff7b72; }
+  #vidro small { display: block; margin-top: 14px; color: #93a1ad; font-size: 12px; border-top: 1px solid #2a3a48; padding-top: 12px; }
 </style>
 <link rel="stylesheet" href="app/vendor/xterm.css">
 <link rel="stylesheet" href="app/app.css">
@@ -369,6 +385,15 @@
 <script src="app/vendor/addon-serialize.js"></script>
 <script src="app/app.js"></script>
 <script src="app/demo.js"></script>
+<div id="vidro"><form autocomplete="off">
+  <h1>📡 Sessão ao vivo</h1>
+  <p>Digite o código do convite. A sessão só abre depois que quem compartilhou <b>aprovar</b> a sua entrada.</p>
+  <label for="v-nome">Seu nome</label><input id="v-nome" maxlength="40" placeholder="Ex.: Ana — NOC" required>
+  <label for="v-cod">Código do convite</label><input id="v-cod" maxlength="16" placeholder="ABCD-EFGH-JKLM" required spellcheck="false">
+  <button id="v-btn" type="submit">Entrar</button>
+  <div id="v-msg"></div>
+  <small>🔒 Criptografia de ponta a ponta (AES-256-GCM + X25519). Você entra como observador.</small>
+</form></div>
 <div id="aviso-web">👁 Você está acompanhando pelo navegador. Aqui só o shell compartilhado responde — o resto fica com quem compartilhou.</div>
 <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
 <script type="module" src="app/ponte-web.js"></script>

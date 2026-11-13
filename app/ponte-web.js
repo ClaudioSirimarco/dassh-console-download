@@ -48,7 +48,7 @@ class Convidado {
     this.timer = setInterval(() => {
       if (!this.vivo) return;
       if (this.k) this.enviar({ t: "ping" });
-      else if (Date.now() - inicio > 180000) this.fim("O dono da sessão não respondeu ao pedido de entrada.");
+      else if (Date.now() - inicio > 90000) this.fim("O dono da sessão não respondeu ao pedido de entrada.");
     }, 5000);
   }
   publicar(blob) { for (const c of this.clientes) if (c.connected) c.publish(this.topico + "/c", blob, { qos: 1 }); }
@@ -113,11 +113,52 @@ addEventListener("beforeunload", () => sessoes.forEach((c) => c.fechar(true)));
 // sobe o app e já abre a entrada pelo código (do #código na URL ou digitado)
 window.dispatchEvent(new Event("pywebviewready"));
 document.body.classList.add("web");
-setTimeout(async () => {
-  const cod = decodeURIComponent(location.hash.slice(1) || "");
-  const a = await entrarSessao(cod || undefined);
-  if (a) for (const id of [...abas.keys()]) if (id !== a.id && !abas.get(id).conectado) fecharAba(id);   // some a aba Serial vazia
-}, 400);
+// --- fonte do terminal no navegador: ajusta só quando o ESPAÇO muda (sem laço de medir -> mudar -> medir) ---
+let _tam = "";
+window.ajustarFonte = () => {
+  const box = document.getElementById("terminal"); if (!box || !box.clientWidth) return;
+  const W = box.clientWidth - 30, H = box.clientHeight - 26, chave = W + "x" + H;
+  if (chave === _tam) return; _tam = chave;
+  abas.forEach((a) => {
+    const c = medirCelula({ options: { ...a.term.options, fontSize: 100 } });   // célula a 100 px: proporção estável
+    const alvo = Math.floor(Math.min(W / (a.term.cols * c.width / 100), H / (a.term.rows * c.height / 100)) * 2) / 2;
+    a.term.options.fontSize = Math.max(9, Math.min(17, alvo));
+  });
+};
+
+// --- portão de vidro fosco: o app só aparece depois que quem compartilhou APROVA a entrada ---
+const vidro = document.getElementById("vidro"), $v = (s) => vidro.querySelector(s);
+const msgV = (t, erro) => { $v("#v-msg").textContent = t || ""; $v("#v-msg").classList.toggle("erro", !!erro); };
+let abaRemota = null;
+const onShareApp = window.onShare, onDescApp = window.onDesconectado;
+window.onShare = (sid, t, d) => {
+  onShareApp(sid, t, d);
+  if (t === "aprovado") vidro.classList.add("aberto");
+};
+window.onDesconectado = (sid, motivo) => {
+  onDescApp(sid, motivo);
+  if (abaRemota && sid === abaRemota.id) {
+    abaRemota = null; vidro.classList.remove("aberto"); $v("#v-btn").disabled = false;
+    msgV(/recusou/.test(motivo) ? "Quem compartilhou recusou a entrada." :
+         /não respondeu/.test(motivo) ? "Sem resposta: confira o código ou peça a quem compartilhou para aprovar." : motivo, true);
+  }
+};
+$v("#v-cod").value = decodeURIComponent(location.hash.slice(1) || "");
+$v("#v-nome").value = lsGet("dassh-nome", "");
+addEventListener("hashchange", () => { if (!abaRemota) $v("#v-cod").value = decodeURIComponent(location.hash.slice(1)); });
+$v("form").onsubmit = async (e) => {
+  e.preventDefault();
+  const nome = $v("#v-nome").value.trim().slice(0, 40), cod = $v("#v-cod").value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (!nome) return msgV("Informe o seu nome.", true);
+  if (cod.length !== 12) return msgV("O código tem 12 caracteres (ex.: ABCD-EFGH-JKLM).", true);
+  $v("#v-btn").disabled = true; msgV("Conectando com segurança…");
+  lsSet("dassh-nome", nome); lsSet("dassh_nome_ok", "1"); NOME = nome;
+  for (const id of [...abas.keys()]) if (!abas.get(id).conectado) fecharAba(id);   // tira a aba de boas-vindas
+  abaRemota = await entrarSessao(cod);
+  if (!abaRemota) { $v("#v-btn").disabled = false; return msgV("Não foi possível conectar. Verifique a internet.", true); }
+  if (!abaRemota.conectado) { const r = abaRemota; abaRemota = null; fecharAba(r.id); $v("#v-btn").disabled = false; return msgV("Não foi possível entrar com esse código.", true); }
+  msgV("🔐 Pedido enviado. Aguardando quem compartilhou aprovar a sua entrada…");
+};
 // tudo que não é do shell compartilhado fica travado (só olhar)
 let tAviso;
 document.addEventListener("click", (e) => {
