@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DASSH Console — shell avançado para infraestrutura</title>
+<title>DASSH Console — opere qualquer infraestrutura, prove cada comando</title>
 <meta name="description" content="DASSH Console: shell avançado multiprotocolo (Serial, SSH, PowerShell, nuvem, iDRAC/iLO) com cofre de credenciais, sessão compartilhada com criptografia de ponta a ponta, automação e evidências auditáveis.">
 <link rel="icon" href="img/favicon.ico">
 <style>
@@ -92,6 +92,14 @@
   details p { color: var(--suave); margin: 10px 0 0; }
 
   footer { padding: 34px 0 44px; text-align: center; color: var(--suave); font-size: 13.5px; border-top: 1px solid var(--borda); }
+  .hero svg.logo { width: 96px; height: 96px; transform-origin: 50% 50%; overflow: visible; }
+  .prompt { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; padding: 8px 14px; border-radius: 10px; min-width: min(420px, 100%);
+    background: #0a0f14; border: 1px solid var(--borda); font: 500 15px/1.3 ui-monospace, Consolas, monospace; color: var(--texto); max-width: 100%; text-align: left; }
+  .prompt .ps { color: var(--verde); white-space: nowrap; }
+  #caret { display: inline-block; width: 9px; height: 18px; background: var(--verde); border-radius: 2px; flex: none; }
+  .hero h1 .grad { background: linear-gradient(90deg, var(--verde), var(--verde-cl)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .selos { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 22px auto 0; max-width: 760px; }
+  .selos span { font-size: 13px; color: var(--suave); border: 1px solid var(--borda); background: var(--painel); border-radius: 999px; padding: 5px 12px; }
 </style>
 </head>
 <body>
@@ -101,14 +109,24 @@
 </div></header>
 
 <section class="hero"><div class="cont">
-  <img class="logo" src="img/logo.png" alt="DASSH Console">
-  <h1>O shell avançado para quem opera infraestrutura</h1>
-  <p class="sub">Serial, SSH, PowerShell, nuvem e iDRAC/iLO numa única plataforma — com <b>cofre de credenciais</b>,
-    <b>sessão compartilhada com criptografia de ponta a ponta</b>, automação por roteiros e evidências auditáveis com relatório PDF assinado.</p>
+  <svg class="logo" id="hlogo" viewBox="0 0 100 100" role="img" aria-label="DASSH Console">
+    <defs><linearGradient id="hlg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c896"/><stop offset="1" stop-color="#004e40"/></linearGradient></defs>
+    <rect x="6" y="6" width="88" height="88" rx="22" fill="url(#hlg)"/>
+    <polyline points="24,30 46,50 24,70" fill="none" stroke="#fff" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect id="hcur" x="52" y="63.5" width="24" height="9" rx="4.5" fill="#fff"/>
+    <circle cx="73" cy="27" r="13" fill="#fff"/>
+    <polyline points="66.5,27.5 71.5,32.5 80,21.5" fill="none" stroke="#004e40" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <div><div class="prompt" aria-hidden="true"><span class="ps">dassh@ops:~$</span> <span id="digita"></span><i id="caret"></i></div></div>
+  <h1>Opere qualquer infraestrutura.<br><span class="grad">Prove cada comando.</span></h1>
+  <p class="sub">O DASSH Console é o shell profissional que une <b>Serial, SSH, PowerShell, Cloud (Azure e Google Cloud) e iDRAC/iLO</b>
+    em uma só plataforma — com <b>cofre de credenciais</b>, <b>sessão compartilhada com criptografia de ponta a ponta</b>,
+    automações por fabricante e <b>evidências com valor de auditoria</b>, do primeiro comando ao relatório assinado.</p>
   <div class="botoes">
     <a class="btn prim" href="https://github.com/ClaudioSirimarco/dassh-console-download/releases/latest/download/DASSH-Console-Setup.exe">⬇ Baixar para Windows <small>instalador</small></a>
     <a class="btn" href="https://github.com/ClaudioSirimarco/dassh-console-download/releases/latest/download/DASSH-Console-Portatil.zip">Versão portátil <small>.zip</small></a>
   </div>
+  <div class="selos"><span>🔒 AES-256-GCM + X25519</span><span>🧾 SHA-256 em cada evidência</span><span>✍️ PDF com assinatura digital</span><span>📐 ISO/IEC 27037</span></div>
   <p class="req">Windows 10 ou 11 (64 bits) · não precisa ser administrador · versão de testes</p>
 </div></section>
 
@@ -131,22 +149,22 @@
 </div></section>
 
 <section class="alt" id="recursos"><div class="cont">
-  <h2>Uma plataforma completa de operação</h2>
-  <p class="lead">Acesso, segurança, colaboração e rastreabilidade — num só lugar, para o uso diário.</p>
+  <h2>Tudo o que a operação exige. Nada do que atrapalha.</h2>
+  <p class="lead">Acesso, segurança, colaboração e rastreabilidade em uma única ferramenta — feita para o dia a dia de quem mantém a infraestrutura de pé.</p>
   <div class="recursos">
-    <div class="rec"><div class="ic">🖥️</div><h3>Shell multiprotocolo</h3><p>Serial, SSH, PowerShell, CMD, Azure e Google Cloud em abas — várias sessões lado a lado.</p></div>
-    <div class="rec"><div class="ic">🔐</div><h3>Cofre de credenciais</h3><p>Senhas cifradas e protegidas pelo Windows: login em um clique, sem expor a credencial na tela.</p></div>
-    <div class="rec"><div class="ic">⚙️</div><h3>Automação por roteiros</h3><p>Sequências de comandos validadas por fabricante, executadas e documentadas automaticamente.</p></div>
-    <div class="rec"><div class="ic">📸</div><h3>Evidência auditável</h3><p><kbd>Ctrl+Alt+E</kbd> gera a imagem padronizada, em 4K, com número, data e fuso, equipamento e hash SHA-256.</p></div>
+    <div class="rec"><div class="ic">🖥️</div><h3>Shell multiprotocolo</h3><p>Serial, SSH, PowerShell, CMD e Cloud (Azure e Google Cloud) em abas — várias sessões lado a lado, com cronômetro e gravação.</p></div>
+    <div class="rec"><div class="ic">🔐</div><h3>Cofre de credenciais</h3><p>Senhas cifradas e protegidas pelo Windows. O login acontece em um clique — a credencial nunca aparece na tela nem na evidência.</p></div>
+    <div class="rec"><div class="ic">⚙️</div><h3>Automações por fabricante</h3><p>Roteiros validados que executam a coleta, paginam até o fim e geram cada evidência sozinhos.</p></div>
+    <div class="rec"><div class="ic">📸</div><h3>Evidência com valor de auditoria</h3><p><kbd>Ctrl+Alt+E</kbd> gera a imagem padronizada, em 4K, com número, data e fuso, equipamento e hash SHA-256.</p></div>
     <div class="rec"><div class="ic">💬</div><h3>Direto no WhatsApp</h3><p>Envia a evidência para a conversa da equipe, em ordem, com fila que não perde nada.</p></div>
-    <div class="rec"><div class="ic">🌐</div><h3>iDRAC, iLO e consoles</h3><p>Interfaces de gerência e o console virtual (inclusive Java) abrem dentro do app.</p></div>
-    <div class="rec"><div class="ic">📄</div><h3>Relatório PDF assinado</h3><p>Capa, resumo, evidências, logs e cadeia de custódia — com assinatura e data.</p></div>
-    <div class="rec"><div class="ic">📡</div><h3>Sessão compartilhada</h3><p>Colaboração em tempo real por código, com aprovação de entrada e criptografia de ponta a ponta (AES-256 + X25519).</p></div>
+    <div class="rec"><div class="ic">🌐</div><h3>iDRAC, iLO e consoles</h3><p>Interfaces de gerência e console virtual (inclusive Java legado) abertos dentro do app — também com evidência.</p></div>
+    <div class="rec"><div class="ic">📄</div><h3>Relatório PDF assinado</h3><p>Capa, evidências, logs originais anexados, hashes e cadeia de custódia — pronto para assinatura do engenheiro de campo e do remoto.</p></div>
+    <div class="rec"><div class="ic">📡</div><h3>Sessão compartilhada</h3><p>Especialistas acompanham ao vivo — pelo app ou direto no navegador — com aprovação individual, controle sob demanda e criptografia de ponta a ponta.</p></div>
   </div>
 </div></section>
 
 <section class="ev"><div class="cont">
-  <h2>Evidência padronizada</h2>
+  <h2>Uma evidência que fala por si</h2>
   <p class="lead">Mesmo formato em todos os atendimentos — pronta para auditoria (ISO/IEC 27037, ISO 27001).</p>
   <img src="img/evidencia-exemplo.png" alt="Exemplo de evidência gerada pelo DASSH Console" loading="lazy">
   <p>Exemplo com dados fictícios.</p>
@@ -184,5 +202,37 @@
 </div></section>
 
 <footer><div class="cont">DASSH Console · DASSH IT Services · <a href="https://github.com/ClaudioSirimarco/dassh-console-download/releases">todas as versões</a></div></footer>
+<script>
+// logo vivo (igual ao app): o cursor do logo e o da frase piscam juntos (1 s) e o logo "bate" a cada aceso
+(() => {
+  const cur = document.getElementById("hcur"), car = document.getElementById("caret"), logo = document.getElementById("hlogo");
+  const el = document.getElementById("digita"); if (!cur || !cur.animate) return;
+  const k = [{ opacity: 1 }, { opacity: 1, offset: 0.5 }, { opacity: 0, offset: 0.5 }, { opacity: 0 }], o = { duration: 1000, iterations: Infinity };
+  const anims = [cur.animate(k, o), car.animate(k, o)];
+  const calmo = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const brilho = (a) => "drop-shadow(0 4px " + (8 + a * 18) + "px rgba(0,200,150," + (0.3 + a * 0.45) + "))";
+  if (!calmo) anims.push(logo.animate([
+    { transform: "scale(1)", filter: brilho(0) }, { transform: "scale(1.10)", filter: brilho(1), offset: 0.08 },
+    { transform: "scale(1)", filter: brilho(0.2), offset: 0.18 }, { transform: "scale(1.06)", filter: brilho(0.7), offset: 0.26 },
+    { transform: "scale(1)", filter: brilho(0), offset: 0.42 }, { transform: "scale(1)", filter: brilho(0) }], Object.assign({ easing: "ease-out" }, o)));
+  const zera = () => anims.forEach((a) => (a.currentTime = 0));   // tudo no mesmo compasso
+  const frases = ["connect --serial COM3 --vault", "share --live --e2e", "run coleta --vendor huawei --all-pages", "evidence --sha256 --pdf --sign"];
+  let f = 0, i = 0, apagando = false;
+  const passo = () => {
+    const alvo = frases[f];
+    if (!apagando) {
+      el.textContent = alvo.slice(0, ++i);
+      if (i === alvo.length) { apagando = true; zera(); return setTimeout(passo, 2600); }
+    } else {
+      el.textContent = alvo.slice(0, --i);
+      if (i === 0) { apagando = false; f = (f + 1) % frases.length; }
+    }
+    anims[0].currentTime = anims[1].currentTime = 0;   // digitando: cursor aceso, como no terminal
+    if (anims[2]) anims[2].currentTime = 600;           // sem batida enquanto digita
+    setTimeout(passo, apagando ? 28 : 55 + Math.random() * 60);
+  };
+  if (calmo) el.textContent = frases[0]; else setTimeout(passo, 600);
+})();
+</script>
 </body>
 </html>
