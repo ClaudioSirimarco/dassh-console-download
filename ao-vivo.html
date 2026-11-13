@@ -6,65 +6,18 @@
 <title>DASSH Console — sessão ao vivo</title>
 <meta name="description" content="Acompanhe pelo navegador uma sessão compartilhada do DASSH Console, com criptografia de ponta a ponta.">
 <link rel="icon" href="img/favicon.ico">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css">
 <style>
-  :root { --fundo: #0b1015; --painel: #141d26; --borda: #22303c; --texto: #e6edf3; --suave: #93a1ad; --verde: #00c896; --aviso: #f6c86b; --erro: #ff7b72; }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.5 system-ui, "Segoe UI", sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
-  #pagtopo { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--borda); flex-wrap: wrap; }
-  #pagtopo a { display: flex; align-items: center; gap: 10px; color: var(--texto); text-decoration: none; font-weight: 700; }
-  #pagtopo img { width: 28px; height: 28px; }
-  #info { margin-left: auto; color: var(--suave); font-size: 13.5px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
-  .pt { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--suave); margin-right: 6px; }
-  .pt.on { background: var(--verde); box-shadow: 0 0 10px var(--verde); }
-  #pagmain { flex: 1; display: flex; flex-direction: column; }
-  #entrar { max-width: 460px; margin: 8vh auto; padding: 28px; background: var(--painel); border: 1px solid var(--borda); border-radius: 14px; width: calc(100% - 32px); }
-  #entrar h1 { font-size: 24px; margin: 0 0 6px; }
-  #entrar p { color: var(--suave); margin: 0 0 18px; }
-  label { display: block; font-size: 13px; color: var(--suave); margin: 12px 0 6px; }
-  input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--borda); background: #0d141b; color: var(--texto); font-size: 16px; }
-  #codigo { font: 600 22px/1 ui-monospace, Consolas, monospace; letter-spacing: 2px; text-transform: uppercase; text-align: center; }
-  button { margin-top: 18px; width: 100%; padding: 13px; border: 0; border-radius: 10px; font-weight: 700; font-size: 16px; cursor: pointer;
-    background: linear-gradient(135deg, var(--verde), #00a07a); color: #04231b; }
-  button:disabled { opacity: .55; cursor: wait; }
-  button.sec { width: auto; margin: 0; padding: 7px 14px; font-size: 13.5px; background: transparent; color: var(--texto); border: 1px solid var(--borda); }
-  #msg { margin-top: 14px; min-height: 22px; font-size: 14px; color: var(--aviso); }
-  #msg.erro { color: var(--erro); }
-  .nota { font-size: 12.5px; color: var(--suave); margin-top: 18px; border-top: 1px solid var(--borda); padding-top: 14px; }
-  #app { display: none; }
-  #app.on { display: contents; }
-  body.sessao #pagtopo, body.sessao #pagmain { display: none !important; }
-  #app .topo button, #app .topo select, #app .topo input, #app .lateral button, #app .lateral select,
-  #app .term-barra button { pointer-events: none; }
-  #app #terminal { background: #000; }
-  #app #terminal .xterm { height: 100%; padding: 6px; }
-  #aviso-ro { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 20; background: #1b2633; color: #e6edf3;
-    border: 1px solid #2f4152; border-radius: 10px; padding: 10px 16px; font-size: 14px; opacity: 0; transition: opacity .25s; pointer-events: none; }
-  #aviso-ro.on { opacity: 1; }
-  #parts { color: var(--suave); }
+  body.web .topo, body.web .lateral, body.web #nova-aba, body.web #btn-compartilhar, body.web #btn-historico { cursor: not-allowed; }
+  body.web .topo *, body.web .lateral *, body.web #nova-aba, body.web #btn-compartilhar, body.web #btn-historico { opacity: .92; }
+  #aviso-web { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 200; background: #1b2633; color: #e6edf3;
+    border: 1px solid #2f4152; border-radius: 10px; padding: 10px 16px; font: 14px system-ui, sans-serif; opacity: 0; transition: opacity .25s; pointer-events: none; }
+  #aviso-web.on { opacity: 1; }
 </style>
+<link rel="stylesheet" href="app/vendor/xterm.css">
+<link rel="stylesheet" href="app/app.css">
 </head>
 <body>
-<header id="pagtopo">
-  <a href="./"><img src="img/logo.png" alt="">DASSH Console</a>
-  <div id="info"><span><span class="pt" id="pt"></span><span id="st">desconectado</span></span><span id="parts"></span>
-    <button class="sec" id="sair" hidden>Sair da sessão</button></div>
-</header>
-<main id="pagmain">
-  <form id="entrar" autocomplete="off">
-    <h1>Acompanhar sessão ao vivo</h1>
-    <p>Digite o código do convite. Quem compartilhou aprova a sua entrada e você acompanha o terminal aqui, sem instalar nada.</p>
-    <label for="codigo">Código do convite</label>
-    <input id="codigo" maxlength="14" placeholder="ABCD-EFGH-JKLM" required spellcheck="false">
-    <label for="nome">Seu nome (aparece para quem compartilhou)</label>
-    <input id="nome" maxlength="40" placeholder="Ex.: Ana — NOC" required>
-    <button id="btn" type="submit">Entrar</button>
-    <div id="msg"></div>
-    <div class="nota">🔒 Criptografia de ponta a ponta (AES-256-GCM + X25519). O servidor de transporte só vê dados cifrados;
-      a chave da sessão é entregue apenas a quem o dono aprova. No navegador você entra como <b>observador</b>.</div>
-  </form>
-</main>
-<div id="app">
+<div id="splash"><img src="app/logo.svg" alt=""><b>DASSH Console</b><span>preparando o ambiente…</span><i></i></div>
 <header class="topo">
   <div class="marca"><svg class="logo" id="logo" viewBox="0 0 100 100" aria-hidden="true">
       <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c896"/><stop offset="1" stop-color="#004e40"/></linearGradient></defs>
@@ -113,7 +66,7 @@
 <main class="corpo">
   <section class="terminal-card">
     <div class="term-barra">
-      <div class="abas-sessao" id="abas-sessao"><div class="aba ativa"><span class="num">1</span><span class="ponto"></span><span class="nome" id="ap-aba">Sessão remota</span><span class="tempo" id="ap-tempo"></span></div></div>
+      <div class="abas-sessao" id="abas-sessao"></div>
       <button class="nova-aba" id="nova-aba" title="Nova aba (Ctrl+Alt+T)">＋</button>
       <button class="lista-abas oculto" id="lista-abas" title="Todas as abas abertas">▾</button>
       <div class="barra-dir">
@@ -124,7 +77,7 @@
         <button class="info grande" data-info="abas" title="Abas, conexões e atalhos">i</button>
       </div>
     </div>
-    <div class="share-barra convidado" id="share-barra"><span class="ao-vivo">SESSÃO REMOTA</span><span class="codigo" id="ap-codigo"></span><span id="ap-pessoas"></span><small style="opacity:.75">👁 observador · somente leitura</small><span class="dir"><button class="btn" id="ap-sair">Sair da sessão</button></span></div>
+    <div class="share-barra oculto" id="share-barra"></div>
     <div class="roteiro-barra oculto" id="roteiro-barra"></div>
     <div id="terminal"></div>
     <div class="sugestao oculto" id="sugestao">
@@ -143,7 +96,7 @@
         <button class="btn mais" id="novo-cliente" title="Novo cliente">＋</button>
       </div>
       <div class="atend">
-        <div class="atend-txt"><div class="visita"><span id="visita-nome">Sessão compartilhada</span></div>
+        <div class="atend-txt"><div class="visita"><span id="visita-nome">—</span></div>
           <button class="lapis" id="renomear-visita" title="Dar nome à visita de hoje">✎ dar nome à visita</button><button class="lapis" id="importar-arquivos" title="Traz arquivos do equipamento (ex.: logs do pendrive) para o atendimento; entram no PDF com SHA-256">📥 importar arquivos</button><button class="lapis" id="nova-visita" title="Outro atendimento hoje (ex.: um por equipamento), com pasta e PDF próprios">＋ nova visita</button></div>
         <div class="proximo"><span>Próxima</span><b id="proximo">Nº --</b></div>
       </div>
@@ -181,150 +134,243 @@
     <div class="card historico">
       <div class="card-tit"><span>Últimas evidências <button class="info" data-info="ultimas" title="Sobre">i</button></span>
         <button class="btn mini" id="btn-todas-ev" title="Todas as evidências do atendimento: ver, abrir e excluir">🖼 Todas</button></div>
-      <ul id="historico"><li class="vazio">As evidências ficam com quem compartilhou</li></ul>
+      <ul id="historico"><li class="vazio">Nenhuma ainda nesta sessão</li></ul>
     </div>
   </aside>
 </main>
+
+<!-- Histórico de sessões -->
+<div class="modal oculto" id="modal-hist">
+  <div class="janela">
+    <div class="jan-topo"><b>⏺ Sessões gravadas <button class="info" data-info="historico" title="Como funciona">i</button></b>
+      <span><button class="btn primario" id="hist-ultima">▶ Assistir a última sessão</button>
+      <button class="sug-x" data-fecha>✕</button></span></div>
+    <div class="jan-corpo"><table class="tabela"><thead><tr>
+      <th>Início</th><th>Conexão</th><th>Duração</th><th>Evidências</th><th></th></tr></thead>
+      <tbody id="hist-linhas"></tbody></table><div id="hist-pag"></div></div>
+  </div>
 </div>
-<div id="aviso-ro">👁 Você está assistindo. Os controles ficam com quem compartilhou a sessão.</div>
+
+<!-- Cofre -->
+<div class="modal oculto" id="modal-cofre">
+  <div class="janela">
+    <div class="jan-topo"><b>🔑 Cofre de credenciais <button class="info" data-info="cofre" title="Como funciona">i</button></b>
+      <button class="sug-x" data-fecha>✕</button></div>
+    <div class="jan-corpo cofre-corpo">
+      <div>
+        <table class="tabela"><thead><tr><th>Nome</th><th>Usuário</th><th>Vale para</th><th></th></tr></thead>
+        <tbody id="cofre-linhas"></tbody></table><div id="cofre-pag"></div>
+        <p class="ajuda">As senhas ficam cifradas pelo Windows (DPAPI): só o seu usuário, neste computador, consegue abrir.
+          Elas nunca aparecem na tela nem vão para logs ou evidências.</p>
+      </div>
+      <form id="cofre-form" class="form" autocomplete="off">
+        <div class="form-tit" id="cofre-form-tit">Nova credencial</div>
+        <input type="hidden" id="cf-id">
+        <label>Nome <input id="cf-nome" placeholder="ex.: Switch BB bancada" required></label>
+        <label>Usuário <input id="cf-usuario" placeholder="ex.: admin (vazio se só pede senha)"></label>
+        <label>Senha <input id="cf-senha" type="password" placeholder="•••••••• (vazio = manter)"></label>
+        <label>Vale para <input id="cf-alvo" placeholder="opcional: COM8, 10.0.0.1, switch…"></label>
+        <div class="linha-btn"><button type="button" class="btn" id="cf-limpar">Limpar</button>
+          <button type="submit" class="btn primario">Salvar</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Formulário rápido (novo cliente / nome da visita) -->
+<div class="modal oculto" id="modal-form">
+  <form class="janela pequena" id="form-rapido" autocomplete="off">
+    <div class="jan-topo"><b id="fr-tit"></b><button type="button" class="sug-x" data-fecha>✕</button></div>
+    <div class="jan-corpo form sem-borda" id="fr-campos"></div>
+    <div class="jan-rodape"><button type="button" class="btn" data-fecha>Cancelar</button>
+      <button type="submit" class="btn primario" id="fr-ok">Salvar</button></div>
+  </form>
+</div>
+
+<!-- Roteiros de coleta -->
+<div class="modal oculto" id="modal-roteiro">
+  <div class="janela">
+    <div class="jan-topo"><b>⚡ Automações de coleta <button class="info" data-info="roteiro" title="Como funciona">i</button></b>
+      <button class="sug-x" data-fecha>✕</button></div>
+    <div class="jan-corpo rot-corpo">
+      <div><div class="rot-busca"><input id="rot-busca" placeholder="🔍 Pesquisar (ex.: huawei, entrega, stack…)" spellcheck="false">
+        <select id="rot-filtro"><option value="">Todos os fabricantes</option></select></div>
+      <ul class="rot-lista" id="rot-lista"></ul></div>
+      <div class="rot-detalhe">
+        <div class="rot-tit" id="rot-tit">Escolha um roteiro</div>
+        <div class="rot-desc" id="rot-desc"></div>
+        <ol class="rot-cmds" id="rot-cmds"></ol>
+        <label class="rot-opc"><input type="checkbox" id="rot-enviar"> Enviar cada evidência no WhatsApp (senão só salva)</label>
+        <div class="linha-btn"><button class="btn primario" id="rot-executar" disabled>▶ Executar na aba ativa</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Assistente de rede do equipamento -->
+<div class="modal oculto" id="modal-rede">
+  <div class="janela">
+    <div class="jan-topo"><b>🛜 Rede do equipamento</b><button class="sug-x" data-fecha>✕</button></div>
+    <div class="jan-corpo" id="rede-corpo"></div>
+  </div>
+</div>
+
+<!-- Diagnóstico do cabo console -->
+<div class="modal oculto" id="modal-cabo">
+  <div class="janela">
+    <div class="jan-topo"><b>🩺 Diagnóstico do cabo console</b>
+      <span><button class="btn" id="cabo-de-novo">⟳ Testar de novo</button> <button class="sug-x" data-fecha>✕</button></span></div>
+    <div class="jan-corpo" id="cabo-corpo"></div>
+  </div>
+</div>
+
+<!-- Fila de envio -->
+<!-- Todas as evidências do atendimento -->
+<div class="modal oculto" id="modal-evid">
+  <div class="janela larga">
+    <div class="jan-topo"><b>🖼 Evidências do atendimento</b><button class="sug-x" data-fecha>✕</button></div>
+    <div class="jan-corpo ev-corpo"><div class="ev-grade" id="ev-grade"></div><div id="ev-pag"></div>
+      <p class="ajuda">Excluir manda a imagem para a <b>Lixeira</b> e registra no manifesto de custódia (o quê, quando, quem e o hash) —
+        o relatório PDF lista as exclusões. A numeração continua de onde parou.</p></div>
+  </div>
+</div>
+
+<div class="modal oculto" id="modal-fila">
+  <div class="janela">
+    <div class="jan-topo"><b>📤 Fila de envio para o WhatsApp</b><button class="sug-x" data-fecha>✕</button></div>
+    <div class="jan-corpo"><div class="fila-agora" id="fila-agora"></div>
+      <table class="tabela"><thead><tr><th>#</th><th>O quê</th><th>Situação</th><th></th></tr></thead><tbody id="fila-linhas"></tbody></table><div id="fila-pag"></div>
+      <p class="ajuda">Os envios vão um por vez, na ordem. Com o WhatsApp fechado a fila espera (fica salva mesmo se fechar o app).
+        Falhou? Tenta de novo 3 vezes no mesmo lugar; depois fica aqui para <b>Reenviar</b>.</p></div>
+  </div>
+</div>
+
+<!-- Evidência ampliada -->
+<div class="modal oculto" id="modal-lb">
+  <div class="janela larga">
+    <div class="jan-topo"><b id="lb-tit">Evidência</b><button class="sug-x" data-fecha>✕</button></div>
+    <div class="jan-corpo lb-corpo"><img id="lb-img" alt=""></div>
+    <div class="jan-rodape"><small id="lb-arq" style="margin-right:auto;color:var(--suave)"></small>
+      <button class="btn" id="lb-reenviar">↻ Reenviar no WhatsApp</button>
+      <button class="btn" id="lb-excluir" title="Excluir esta evidência (vai para a Lixeira; fica registrado no manifesto)">🗑 Excluir</button>
+      <button class="btn" id="lb-pasta">📂 Pasta</button><button class="btn primario" id="lb-abrir">Abrir imagem</button></div>
+  </div>
+</div>
+
+<!-- Player de gravação -->
+<div class="modal oculto" id="modal-player">
+  <div class="janela larga">
+    <div class="jan-topo"><b id="pl-tit">▶ Gravação</b><button class="sug-x" data-fecha>✕</button></div>
+    <div class="jan-corpo"><div id="pl-term"></div>
+      <div class="pl-ctrl"><button class="btn" id="pl-play">⏸</button>
+        <input type="range" id="pl-pos" min="0" max="1000" value="0"><span id="pl-tempo">0:00 / 0:00</span>
+        <select id="pl-pausa" title="Pausas da sessão"><option value="2" selected>⏩ Pular pausas</option><option value="0">⏱ Tempo real</option></select>
+        <select id="pl-vel"><option value="1" selected>1x</option><option value="2">2x</option><option value="4">4x</option><option value="10">10x</option></select></div>
+    </div>
+  </div>
+</div>
+
+<!-- Convite para a sessão ao vivo -->
+<div class="modal oculto" id="modal-convite">
+  <div class="janela">
+    <div class="jan-topo"><b>✉ Convidar para a sessão ao vivo · código <span class="codigo" id="cv-codigo"></span></b>
+      <button class="sug-x" data-fecha>✕</button></div>
+    <div class="jan-corpo cv-corpo">
+      <div>
+        <label class="cv-l">Para quem (contato ou grupo do WhatsApp)
+          <input id="cv-para" list="cv-lista" autocomplete="off"><datalist id="cv-lista"></datalist></label>
+        <div class="cv-chips" id="cv-chips"></div>
+        <label class="cv-l">Link de download do DASSH Console <small>(fica salvo para os próximos convites)</small>
+          <input id="cv-link" placeholder="https://github.com/…/releases/latest  ·  link do OneDrive/Drive"></label>
+        <p class="ajuda">O convite pode ir para uma conversa diferente da que recebe as evidências. Quem recebe instala, clica em
+          <b>🔗 Entrar</b> e digita o código; você aprova a entrada e decide quem digita (verde = ativo, amarelo = observando).</p>
+      </div>
+      <div class="cv-prev"><div class="cv-bolha"><textarea id="cv-texto" spellcheck="false"></textarea></div>
+        <small>Prévia — pode editar antes de enviar. *negrito* e _itálico_ como no WhatsApp.</small></div>
+    </div>
+    <div class="jan-rodape"><button class="btn" id="cv-copiar">📋 Copiar texto</button>
+      <button class="btn primario" id="cv-enviar">✉ Enviar pelo WhatsApp</button></div>
+  </div>
+</div>
+
+<!-- Equipamentos salvos -->
+<div class="modal oculto" id="modal-equip">
+  <div class="janela">
+    <div class="jan-topo"><b>📚 Equipamentos salvos</b>
+      <span><button class="btn" id="eq-salvar-aba" title="Guarda a conexão da aba atual na lista">＋ Salvar a aba atual</button>
+      <button class="btn" id="eq-novo">＋ Novo</button>
+      <button class="btn" id="eq-importar" title="CSV, JSON ou sessões do PuTTY">⬇ Importar</button>
+      <button class="btn" id="eq-exportar" title="Planilha CSV (Excel) ou backup JSON">⬆ Exportar</button>
+      <button class="sug-x" data-fecha>✕</button></span></div>
+    <div class="jan-corpo">
+      <div class="eq-filtros"><input id="eq-busca" placeholder="🔎 Pesquisar por nome, IP, grupo…" autocomplete="off">
+        <select id="eq-tipo"><option value="">Todos os tipos</option><option value="serial">Serial</option><option value="ssh">SSH</option>
+          <option value="web">Web (iDRAC/iLO…)</option></select>
+        <select id="eq-ordem"><option value="nome">Ordenar: nome</option><option value="ultima">Usados por último</option>
+          <option value="grupo">Grupo</option></select></div>
+      <div class="eq-form oculto" id="eq-form">
+        <input id="eq-f-nome" placeholder="Nome (ex.: SW Core andar 3)">
+        <select id="eq-f-tipo"><option value="ssh">SSH</option><option value="web">Web</option><option value="serial">Serial</option></select>
+        <input id="eq-f-destino" placeholder="admin@10.0.0.1 · https://10.0.0.20 · COM3:9600">
+        <input id="eq-f-grupo" placeholder="Grupo / cliente"><input id="eq-f-obs" placeholder="Observação">
+        <button class="btn primario" id="eq-f-ok">Salvar</button><button class="btn" id="eq-f-cancelar">Cancelar</button></div>
+      <div class="eq-lista"><table class="tabela eq-tab"><thead><tr><th>Nome</th><th>Tipo</th><th>Destino</th><th>Grupo</th><th>Último uso</th><th></th></tr></thead>
+        <tbody id="eq-linhas"></tbody></table></div>
+      <div class="eq-pag" id="eq-pag"></div>
+      <p class="ajuda">Duplo clique ou ▶ conecta (na aba atual, se estiver livre; senão numa aba nova). Importa planilha CSV
+        (colunas <b>nome, tipo, destino, grupo, obs</b>), backup JSON ou as <b>sessões salvas do PuTTY</b>. Senhas não entram
+        na lista — ficam no cofre 🔑.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Relatório PDF: visualizar e assinar dentro do app -->
+<div class="modal oculto" id="modal-pdf">
+  <div class="janela pdf-jan">
+    <div class="jan-topo"><b id="pdf-tit">📄 Relatório</b>
+      <span><button class="btn" id="pdf-fora" title="Abrir no leitor de PDF do Windows (Adobe, gov.br…)">↗ Abrir fora</button>
+      <button class="btn" id="pdf-pasta">📂 Pasta</button><button class="btn" id="pdf-wa">📤 Enviar no WhatsApp</button>
+      <button class="sug-x" data-fecha>✕</button></span></div>
+    <div class="pdf-corpo">
+      <iframe id="pdf-ver" title="Relatório"></iframe>
+      <div class="pdf-lado">
+        <h4>✍ Assinar e datar</h4>
+        <div id="pdf-quadros"></div>
+        <label>Quem assina <select id="pdf-papel"><option value="tecnico">Engenheiro de campo</option>
+          <option value="cliente">Engenheiro remoto (Zoom)</option></select></label>
+        <label>Nome completo <input id="pdf-nome" autocomplete="off" placeholder="Nome de quem assina"></label>
+        <label>Local <input id="pdf-local" autocomplete="off" placeholder="Cidade / unidade (opcional)"></label>
+        <div class="pdf-rub-tit">Rubrica <small>(opcional — desenhe com o mouse ou o dedo)</small>
+          <button class="btn mini" id="pdf-rub-limpar">limpar</button></div>
+        <canvas id="pdf-rub" width="560" height="180"></canvas>
+        <div class="pdf-data">Data e hora: <b id="pdf-agora"></b></div>
+        <button class="btn primario largo" id="pdf-assinar">✍ Assinar e datar</button>
+        <p class="ajuda">Assinatura eletrônica com certificado próprio do DASSH Console (criado para o seu nome; a chave fica
+          protegida pelo Windows). Qualquer alteração no PDF depois de assinado é detectada. Para assinatura
+          <b>gov.br</b> ou <b>ICP-Brasil</b>, use "Abrir fora" — o quadro do outro papel continua livre.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pedidos de entrada / controle (compartilhamento) -->
+<div class="pedidos" id="pedidos"></div>
+
+<!-- Vitrine de temas -->
+<div class="tema-pop oculto" id="tema-pop">
+  <div class="tp-tit">🎨 Tema do terminal <small>— muda só a tela; a evidência mantém o padrão aprovado</small></div>
+  <div class="tp-grade" id="tp-grade"></div>
+</div>
+
+<div class="menu-abas oculto" id="menu-abas"></div>
+<div class="popover oculto" id="popover"><div class="pop-tit" id="pop-tit"></div><div class="pop-corpo" id="pop-corpo"></div></div>
+<div id="toast"></div>
+<script src="app/vendor/xterm.js"></script>
+<script src="app/vendor/addon-serialize.js"></script>
+<script src="app/app.js"></script>
+<script src="app/demo.js"></script>
+<div id="aviso-web">👁 Você está acompanhando pelo navegador. Aqui só o shell compartilhado responde — o resto fica com quem compartilhou.</div>
 <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.min.js"></script>
-<script type="module">
-// Mesmo protocolo do compartilhar.py (dassh/v1): cada código = um tópico próprio -> várias sessões independentes,
-// e vários observadores por sessão (cada um com seu par X25519 e aprovação individual).
-import { x25519 } from "https://esm.sh/@noble/curves@1.6.0/ed25519";
-import { scryptAsync } from "https://esm.sh/@noble/hashes@1.5.0/scrypt";
-import { hkdf } from "https://esm.sh/@noble/hashes@1.5.0/hkdf";
-import { sha256 } from "https://esm.sh/@noble/hashes@1.5.0/sha256";
-
-const SERVIDORES = ["wss://broker.emqx.io:8084/mqtt", "wss://test.mosquitto.org:8081/mqtt"];
-const ALFA = /[^A-Z0-9]/g, te = new TextEncoder(), td = new TextDecoder();
-const $ = (s) => document.querySelector(s);
-const b64 = (u) => btoa(String.fromCharCode(...u));
-const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
-const hex = (u) => [...u].map((x) => x.toString(16).padStart(2, "0")).join("");
-
-async function fluxo(dados, Stream) {
-  return new Uint8Array(await new Response(new Blob([dados]).stream().pipeThrough(new Stream("deflate"))).arrayBuffer());
-}
-async function cifrar(chave, obj) {
-  const k = await crypto.subtle.importKey("raw", chave, "AES-GCM", false, ["encrypt"]);
-  const n = crypto.getRandomValues(new Uint8Array(12));
-  const c = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: n }, k, await fluxo(te.encode(JSON.stringify(obj)), CompressionStream)));
-  const out = new Uint8Array(12 + c.length); out.set(n); out.set(c, 12); return out;
-}
-async function decifrar(chave, blob) {
-  const k = await crypto.subtle.importKey("raw", chave, "AES-GCM", false, ["decrypt"]);
-  const p = await crypto.subtle.decrypt({ name: "AES-GCM", iv: blob.slice(0, 12) }, k, blob.slice(12));
-  return JSON.parse(td.decode(await fluxo(new Uint8Array(p), DecompressionStream)));
-}
-
-let S = null;   // estado da sessão atual
-const term = new Terminal({ fontFamily: "Consolas, 'Cascadia Mono', monospace", fontSize: 14, disableStdin: true, scrollback: 5000,
-  theme: { background: "#000000" }, convertEol: false });
-const fit = new FitAddon.FitAddon(); term.loadAddon(fit);
-
-function status(txt, on) { $("#st").textContent = txt; $("#pt").classList.toggle("on", !!on); }
-function aviso(txt, erro) { $("#msg").textContent = txt; $("#msg").classList.toggle("erro", !!erro); }
-
-async function entrar(codigoDigitado, nome) {
-  const codigo = codigoDigitado.toUpperCase().replace(ALFA, "");
-  if (codigo.length !== 12) throw new Error("O código tem 12 caracteres (ex.: ABCD-EFGH-JKLM).");
-  aviso("Preparando a chave da sessão…");
-  const portaria = await scryptAsync(te.encode(codigo), te.encode("dassh-share-v1"), { N: 2 ** 15, r: 8, p: 1, dkLen: 32 });
-  const topico = "dassh/v1/" + hex(sha256(te.encode("topico|" + codigo))).slice(0, 40);
-  const priv = x25519.utils.randomPrivateKey();
-  const id = hex(crypto.getRandomValues(new Uint8Array(5)));
-  S = { codigo, topico, portaria, priv, id, k: null, wrap: null, clientes: [], vivo: true, nome };
-
-  aviso("Conectando ao servidor de compartilhamento…");
-  // conecta em todos os servidores (o dono usa o primeiro que responder; assim não importa qual foi)
-  await Promise.any(SERVIDORES.map((url) => new Promise((ok, falha) => {
-    const c = mqtt.connect(url, { clientId: "dassh-web-" + hex(crypto.getRandomValues(new Uint8Array(6))), reconnectPeriod: 2000, connectTimeout: 12000 });
-    c.on("connect", () => { c.subscribe(topico + "/h", { qos: 1 }); if (!S.clientes.includes(c)) S.clientes.push(c); ok(c); });
-    c.on("message", (_t, m) => receber(new Uint8Array(m)));
-    c.on("error", falha);
-    setTimeout(() => falha(new Error("tempo esgotado")), 13000);
-  }))).catch(() => { throw new Error("Sem acesso ao servidor de compartilhamento. Verifique a internet/firewall."); });
-
-  await publicar(await cifrar(portaria, { t: "entrar", id, nome, pub: b64(x25519.getPublicKey(priv)) }));
-  status("aguardando aprovação…");
-  aviso("Pedido enviado. Aguarde quem compartilhou aprovar a sua entrada.");
-  const inicio = Date.now();
-  S.timer = setInterval(async () => {
-    if (!S || !S.vivo) return;
-    if (S.k) publicar(await cifrar(S.k, { t: "ping", id: S.id }));
-    else if (Date.now() - inicio > 180000) encerrar("Quem compartilhou não respondeu ao pedido de entrada.");
-  }, 5000);
-}
-async function publicar(blob) { for (const c of S.clientes) if (c.connected) c.publish(S.topico + "/c", blob, { qos: 1 }); }
-
-async function receber(blob) {
-  if (!S || !S.vivo) return;
-  let msg = null;
-  if (S.k) msg = await decifrar(S.k, blob).catch(() => null);
-  if (!msg) msg = await decifrar(S.portaria, blob).catch(() => null);
-  if (!msg || (msg.para && msg.para !== S.id)) return;
-  const t = msg.t;
-  if (t === "aprovado" || t === "rechave") {
-    if (t === "aprovado") S.wrap = hkdf(sha256, x25519.getSharedSecret(S.priv, unb64(msg.hpub)), undefined, te.encode("dassh-share-wrap"), 32);
-    if (!S.wrap) return;
-    S.k = unb64((await decifrar(S.wrap, unb64(msg.k))).k);
-    if (t === "aprovado") abrirTela();
-  } else if (t === "negado") encerrar("Quem compartilhou recusou a entrada.");
-  else if (t === "out") term.write(msg.d || "");
-  else if (t === "snap") { term.reset(); term.write(msg.d || ""); }
-  else if (t === "estado") {
-    const ps = msg.participantes || [];
-    $("#parts").textContent = "👥 " + ps.map((p) => p.nome + (p.papel === "dono" ? " (dono)" : "")).join(", ");
-    $("#ap-pessoas").innerHTML = ps.map((p) => `<span class="pessoa ${p.ativo ? "ativo" : "passivo"}"><span class="bola"></span>${p.nome.replace(/[<>&]/g, "")}${p.papel === "dono" ? " <small>dono</small>" : ""}</span>`).join(" ");
-    const dono = ps.find((p) => p.papel === "dono"); if (dono) $("#ap-aba").textContent = "📡 " + dono.nome;
-  } else if (t === "fim") encerrar("Quem compartilhou encerrou a sessão.");
-}
-
-function abrirTela() {
-  if (!document.getElementById("css-app")) {   // visual do app só na sessão (não mexe no formulário)
-    const l = document.createElement("link"); l.id = "css-app"; l.rel = "stylesheet"; l.href = "app/app.css"; document.head.appendChild(l);
-    l.onload = () => fit.fit();
-  }
-  $("#app").classList.add("on"); document.body.classList.add("sessao");
-  $("#ap-codigo").textContent = S.codigo.replace(/(.{4})(.{4})(.{4})/, "$1-$2-$3");
-  S.t0 = Date.now(); S.relogio = setInterval(() => { const s = Math.floor((Date.now() - S.t0) / 1000);
-    $("#ap-tempo").textContent = `${String(Math.floor(s / 3600)).padStart(2, "0")}:${String(Math.floor(s / 60) % 60).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`; }, 1000);
-  if (!term.element) term.open($("#terminal"));
-  setTimeout(() => fit.fit(), 50);
-}
-let tAviso;
-$("#app").addEventListener("click", (e) => {
-  if (e.target.closest("#terminal") || e.target.closest("#ap-sair")) return;
-  $("#aviso-ro").classList.add("on"); clearTimeout(tAviso); tAviso = setTimeout(() => $("#aviso-ro").classList.remove("on"), 2200);
-});
-$("#ap-sair").onclick = () => encerrar("Você saiu da sessão.", true);
-async function encerrar(motivo, avisar) {
-  if (!S) return;
-  const s = S; s.vivo = false; clearInterval(s.timer); clearInterval(s.relogio);
-  $("#app").classList.remove("on"); document.body.classList.remove("sessao"); document.getElementById("css-app")?.remove(); term.reset();
-  if (avisar && s.k) try { await publicar(await cifrar(s.k, { t: "sair", id: s.id })); } catch {}
-  setTimeout(() => s.clientes.forEach((c) => c.end(true)), 300);
-  S = null;
-  $("#entrar").style.display = ""; $("#sair").hidden = true; $("#parts").textContent = "";
-  status("desconectado"); aviso(motivo || "", !avisar); $("#btn").disabled = false;
-}
-
-addEventListener("resize", () => term.element && fit.fit());
-addEventListener("beforeunload", () => S && S.k && encerrar("", true));
-$("#sair").onclick = () => encerrar("Você saiu da sessão.", true);
-const doHash = () => { if (location.hash.length > 1 && !S) $("#codigo").value = decodeURIComponent(location.hash.slice(1)); };
-doHash(); addEventListener("hashchange", doHash);
-try { $("#nome").value = localStorage.getItem("dassh-nome") || ""; } catch {}
-$("#entrar").onsubmit = async (e) => {
-  e.preventDefault(); $("#btn").disabled = true;
-  const nome = $("#nome").value.trim().slice(0, 40);
-  try { localStorage.setItem("dassh-nome", nome); } catch {}
-  try { await entrar($("#codigo").value, nome); }
-  catch (err) { if (S) { S.clientes.forEach((c) => c.end(true)); S = null; } aviso(err.message || String(err), true); $("#btn").disabled = false; status("desconectado"); }
-};
-</script>
+<script type="module" src="app/ponte-web.js"></script>
 </body>
 </html>
