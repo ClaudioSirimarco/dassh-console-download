@@ -11,13 +11,13 @@
   :root { --fundo: #0b1015; --painel: #141d26; --borda: #22303c; --texto: #e6edf3; --suave: #93a1ad; --verde: #00c896; --aviso: #f6c86b; --erro: #ff7b72; }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.5 system-ui, "Segoe UI", sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
-  header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--borda); flex-wrap: wrap; }
-  header a { display: flex; align-items: center; gap: 10px; color: var(--texto); text-decoration: none; font-weight: 700; }
-  header img { width: 28px; height: 28px; }
+  #pagtopo { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--borda); flex-wrap: wrap; }
+  #pagtopo a { display: flex; align-items: center; gap: 10px; color: var(--texto); text-decoration: none; font-weight: 700; }
+  #pagtopo img { width: 28px; height: 28px; }
   #info { margin-left: auto; color: var(--suave); font-size: 13.5px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
   .pt { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--suave); margin-right: 6px; }
   .pt.on { background: var(--verde); box-shadow: 0 0 10px var(--verde); }
-  main { flex: 1; display: flex; flex-direction: column; }
+  #pagmain { flex: 1; display: flex; flex-direction: column; }
   #entrar { max-width: 460px; margin: 8vh auto; padding: 28px; background: var(--painel); border: 1px solid var(--borda); border-radius: 14px; width: calc(100% - 32px); }
   #entrar h1 { font-size: 24px; margin: 0 0 6px; }
   #entrar p { color: var(--suave); margin: 0 0 18px; }
@@ -31,18 +31,26 @@
   #msg { margin-top: 14px; min-height: 22px; font-size: 14px; color: var(--aviso); }
   #msg.erro { color: var(--erro); }
   .nota { font-size: 12.5px; color: var(--suave); margin-top: 18px; border-top: 1px solid var(--borda); padding-top: 14px; }
-  #tela { display: none; flex: 1; padding: 10px; background: #000; min-height: 60vh; }
-  #tela .xterm { height: 100%; }
+  #app { display: none; }
+  #app.on { display: contents; }
+  body.sessao #pagtopo, body.sessao #pagmain { display: none !important; }
+  #app .topo button, #app .topo select, #app .topo input, #app .lateral button, #app .lateral select,
+  #app .term-barra button { pointer-events: none; }
+  #app #terminal { background: #000; }
+  #app #terminal .xterm { height: 100%; padding: 6px; }
+  #aviso-ro { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 20; background: #1b2633; color: #e6edf3;
+    border: 1px solid #2f4152; border-radius: 10px; padding: 10px 16px; font-size: 14px; opacity: 0; transition: opacity .25s; pointer-events: none; }
+  #aviso-ro.on { opacity: 1; }
   #parts { color: var(--suave); }
 </style>
 </head>
 <body>
-<header>
+<header id="pagtopo">
   <a href="./"><img src="img/logo.png" alt="">DASSH Console</a>
   <div id="info"><span><span class="pt" id="pt"></span><span id="st">desconectado</span></span><span id="parts"></span>
     <button class="sec" id="sair" hidden>Sair da sessão</button></div>
 </header>
-<main>
+<main id="pagmain">
   <form id="entrar" autocomplete="off">
     <h1>Acompanhar sessão ao vivo</h1>
     <p>Digite o código do convite. Quem compartilhou aprova a sua entrada e você acompanha o terminal aqui, sem instalar nada.</p>
@@ -55,8 +63,130 @@
     <div class="nota">🔒 Criptografia de ponta a ponta (AES-256-GCM + X25519). O servidor de transporte só vê dados cifrados;
       a chave da sessão é entregue apenas a quem o dono aprova. No navegador você entra como <b>observador</b>.</div>
   </form>
-  <div id="tela"></div>
 </main>
+<div id="app">
+<header class="topo">
+  <div class="marca"><svg class="logo" id="logo" viewBox="0 0 100 100" aria-hidden="true">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c896"/><stop offset="1" stop-color="#004e40"/></linearGradient></defs>
+      <rect x="6" y="6" width="88" height="88" rx="22" fill="url(#lg)"/>
+      <polyline points="24,30 46,50 24,70" fill="none" stroke="#fff" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect id="logo-cursor" x="52" y="63.5" width="24" height="9" rx="4.5" fill="#fff"/>
+      <circle cx="73" cy="27" r="13" fill="#fff"/>
+      <polyline points="66.5,27.5 71.5,32.5 80,21.5" fill="none" stroke="#004e40" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg><div><b>DASSH Console</b><small>Terminal · evidências · sessão ao vivo</small></div></div>
+
+  <div class="conexao">
+    <div class="abas" id="abas">
+      <button data-tipo="serial" class="ativa">Serial</button>
+      <button data-tipo="powershell">PowerShell</button>
+      <button data-tipo="cmd">CMD</button>
+      <button data-tipo="ssh">SSH</button>
+      <button data-tipo="azure" title="Azure CLI (instala sozinho se faltar)">Azure</button>
+      <button data-tipo="gcp" title="Google Cloud CLI (instala sozinho se faltar)">GCP</button>
+      <button data-tipo="web" title="Interfaces web: iDRAC, iLO, iBMC, XClarity, IPMI, firewalls...">🌐 Web</button>
+    </div>
+    <div class="campos" id="campos-serial">
+      <select id="porta" title="Porta COM"></select>
+      <button class="icone" id="atualizar-portas" title="Atualizar portas">⟳</button>
+      <button class="icone" id="liberar-porta" title="🔓 Liberar porta travada (“acesso negado”) sem reiniciar o app">🔓</button>
+      <button class="icone" id="diag-cabo" title="Diagnóstico do cabo console (driver, Erro 31, lixo…)">🩺</button>
+      <select id="baud" title="Velocidade">
+        <option>9600</option><option>19200</option><option>38400</option><option>57600</option><option>115200</option>
+      </select>
+    </div>
+    <div class="campos oculto" id="campos-ssh">
+      <input id="ssh-destino" placeholder="usuario@ip" spellcheck="false">
+      <button class="icone" data-rede="ssh" title="Rede do equipamento (IP temporário no notebook)">🛜</button>
+    </div>
+    <div class="campos oculto" id="campos-web">
+      <input id="web-url" placeholder="https://IP do iDRAC / iLO / iBMC" spellcheck="false">
+      <button class="icone" data-rede="web" title="Rede do equipamento (IP temporário no notebook)">🛜</button>
+    </div>
+    <div class="atalhos-con">
+      <button class="btn icone-txt" id="btn-equip" title="Equipamentos salvos: conectar com 1 clique, importar e exportar">📚<span class="rot"> Equipamentos</span></button>
+      <button class="btn icone-txt" id="btn-cofre" title="Cofre de usuários e senhas (sugere o login na hora)">🔑<span class="rot"> Cofre</span></button>
+    </div>
+    <button class="btn primario" id="conectar">Conectar</button>
+  </div>
+</header>
+
+<main class="corpo">
+  <section class="terminal-card">
+    <div class="term-barra">
+      <div class="abas-sessao" id="abas-sessao"><div class="aba ativa"><span class="num">1</span><span class="ponto"></span><span class="nome" id="ap-aba">Sessão remota</span><span class="tempo" id="ap-tempo"></span></div></div>
+      <button class="nova-aba" id="nova-aba" title="Nova aba (Ctrl+Alt+T)">＋</button>
+      <button class="lista-abas oculto" id="lista-abas" title="Todas as abas abertas">▾</button>
+      <div class="barra-dir">
+        <button class="btn mini destaque" id="btn-compartilhar" title="Compartilhar esta aba ao vivo (convite pelo WhatsApp)">📡<span class="rot"> Compartilhar</span></button>
+        <button class="btn mini" id="btn-entrar" title="Entrar na sessão de outra pessoa com o código">🔗<span class="rot"> Entrar</span></button>
+        <button class="btn mini" id="btn-historico" title="Sessões gravadas: assistir (▶), log e reconectar">⏺<span class="rot"> Gravações</span></button>
+        <button class="btn mini ic" id="btn-tema" title="Tema do terminal (cores e fonte)">🎨</button>
+        <button class="info grande" data-info="abas" title="Abas, conexões e atalhos">i</button>
+      </div>
+    </div>
+    <div class="share-barra convidado" id="share-barra"><span class="ao-vivo">SESSÃO REMOTA</span><span class="codigo" id="ap-codigo"></span><span id="ap-pessoas"></span><small style="opacity:.75">👁 observador · somente leitura</small><span class="dir"><button class="btn" id="ap-sair">Sair da sessão</button></span></div>
+    <div class="roteiro-barra oculto" id="roteiro-barra"></div>
+    <div id="terminal"></div>
+    <div class="sugestao oculto" id="sugestao">
+      <span class="sug-tit" id="sug-tit">🔑 Login detectado</span>
+      <div class="sug-itens" id="sug-itens"></div>
+      <button class="sug-x" id="sug-fechar" title="Ignorar">✕</button>
+    </div>
+  </section>
+
+  <aside class="lateral">
+    <div class="card">
+      <div class="card-tit"><span>Atendimento <button class="info" data-info="atendimento" title="Como funciona">i</button></span>
+        <button class="engrenagem" id="trocar-raiz" title="Pasta raiz dos atendimentos">⚙</button></div>
+      <div class="linha-cli">
+        <select id="cliente-sel" title="Cliente"></select>
+        <button class="btn mais" id="novo-cliente" title="Novo cliente">＋</button>
+      </div>
+      <div class="atend">
+        <div class="atend-txt"><div class="visita"><span id="visita-nome">Sessão compartilhada</span></div>
+          <button class="lapis" id="renomear-visita" title="Dar nome à visita de hoje">✎ dar nome à visita</button><button class="lapis" id="importar-arquivos" title="Traz arquivos do equipamento (ex.: logs do pendrive) para o atendimento; entram no PDF com SHA-256">📥 importar arquivos</button><button class="lapis" id="nova-visita" title="Outro atendimento hoje (ex.: um por equipamento), com pasta e PDF próprios">＋ nova visita</button></div>
+        <div class="proximo"><span>Próxima</span><b id="proximo">Nº --</b></div>
+      </div>
+      <button class="btn largo" id="abrir-pasta">📂 Abrir pasta do atendimento</button>
+    </div>
+
+    <div class="card">
+      <div class="card-tit"><span>Evidência <button class="info" data-info="evidencia" title="Como funciona">i</button>
+        <button class="chip-tg on" id="tg-limpar" title="Limpar a tela depois de cada evidência (Salvar/Enviar)">🧹<span class="rot"> limpar</span></button>
+        <button class="chip-tg" id="tg-ativa" title="Manter a sessão da aba ativa (evita desconexão por inatividade)">⏱<span class="rot"> ativa</span></button>
+        <button class="chip-tg on" id="tg-gravar" title="Gravar automaticamente as sessões novas (dá para parar/gravar em cada aba pelo REC)">⏺<span class="rot"> gravar</span></button></span>
+        <span class="aba-alvo" id="aba-alvo"></span></div>
+      <div class="acoes-2">
+        <button class="acao" id="limpar"><span>Limpar</span><kbd>Ctrl+Alt+L</kbd></button>
+        <button class="acao" id="salvar"><span>Salvar</span><kbd>Ctrl+Alt+P</kbd></button>
+      </div>
+      <button class="acao enviar" id="enviar"><span>Enviar evidência</span><kbd>Ctrl+Alt+E</kbd></button>
+      <div class="acoes-2 extra">
+        <button class="acao" id="btn-roteiro" title="Automações: o app executa uma lista de comandos de coleta e tira as evidências sozinho"><span>⚡ Automações</span></button>
+        <button class="acao" id="btn-relatorio" title="PDF do atendimento: evidências, logs, hashes e assinaturas"><span>📄 Relatório</span></button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-tit"><span>WhatsApp <button class="info" data-info="whatsapp" title="Como conectar">i</button></span>
+        <span><span class="status-wa fila oculto" id="wa-fila"></span> <span class="status-wa" id="wa-status">fechado</span></span></div>
+      <div class="conversa" id="conversa">Nenhuma conversa conectada</div>
+      <button class="wa-andamento oculto" id="wa-andamento" title="Ver a fila de envio"></button>
+      <div class="linha-btn">
+        <button class="btn" id="wa-abrir" title="Abrir o WhatsApp Web do app">Abrir<span class="rot2"> WhatsApp</span></button>
+        <button class="btn" id="wa-conectar" title="Usar a conversa aberta no WhatsApp para as evidências">Conectar<span class="rot2"> conversa</span></button>
+      </div>
+    </div>
+
+    <div class="card historico">
+      <div class="card-tit"><span>Últimas evidências <button class="info" data-info="ultimas" title="Sobre">i</button></span>
+        <button class="btn mini" id="btn-todas-ev" title="Todas as evidências do atendimento: ver, abrir e excluir">🖼 Todas</button></div>
+      <ul id="historico"><li class="vazio">As evidências ficam com quem compartilhou</li></ul>
+    </div>
+  </aside>
+</main>
+</div>
+<div id="aviso-ro">👁 Você está assistindo. Os controles ficam com quem compartilhou a sessão.</div>
 <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.min.js"></script>
@@ -148,18 +278,33 @@ async function receber(blob) {
   else if (t === "estado") {
     const ps = msg.participantes || [];
     $("#parts").textContent = "👥 " + ps.map((p) => p.nome + (p.papel === "dono" ? " (dono)" : "")).join(", ");
+    $("#ap-pessoas").innerHTML = ps.map((p) => `<span class="pessoa ${p.ativo ? "ativo" : "passivo"}"><span class="bola"></span>${p.nome.replace(/[<>&]/g, "")}${p.papel === "dono" ? " <small>dono</small>" : ""}</span>`).join(" ");
+    const dono = ps.find((p) => p.papel === "dono"); if (dono) $("#ap-aba").textContent = "📡 " + dono.nome;
   } else if (t === "fim") encerrar("Quem compartilhou encerrou a sessão.");
 }
 
 function abrirTela() {
-  $("#entrar").style.display = "none"; $("#tela").style.display = "block"; $("#sair").hidden = false;
-  status("ao vivo · " + S.codigo.replace(/(.{4})(.{4})(.{4})/, "$1-$2-$3"), true);
-  if (!term.element) term.open($("#tela"));
-  fit.fit();
+  if (!document.getElementById("css-app")) {   // visual do app só na sessão (não mexe no formulário)
+    const l = document.createElement("link"); l.id = "css-app"; l.rel = "stylesheet"; l.href = "app/app.css"; document.head.appendChild(l);
+    l.onload = () => fit.fit();
+  }
+  $("#app").classList.add("on"); document.body.classList.add("sessao");
+  $("#ap-codigo").textContent = S.codigo.replace(/(.{4})(.{4})(.{4})/, "$1-$2-$3");
+  S.t0 = Date.now(); S.relogio = setInterval(() => { const s = Math.floor((Date.now() - S.t0) / 1000);
+    $("#ap-tempo").textContent = `${String(Math.floor(s / 3600)).padStart(2, "0")}:${String(Math.floor(s / 60) % 60).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`; }, 1000);
+  if (!term.element) term.open($("#terminal"));
+  setTimeout(() => fit.fit(), 50);
 }
+let tAviso;
+$("#app").addEventListener("click", (e) => {
+  if (e.target.closest("#terminal") || e.target.closest("#ap-sair")) return;
+  $("#aviso-ro").classList.add("on"); clearTimeout(tAviso); tAviso = setTimeout(() => $("#aviso-ro").classList.remove("on"), 2200);
+});
+$("#ap-sair").onclick = () => encerrar("Você saiu da sessão.", true);
 async function encerrar(motivo, avisar) {
   if (!S) return;
-  const s = S; s.vivo = false; clearInterval(s.timer);
+  const s = S; s.vivo = false; clearInterval(s.timer); clearInterval(s.relogio);
+  $("#app").classList.remove("on"); document.body.classList.remove("sessao"); document.getElementById("css-app")?.remove(); term.reset();
   if (avisar && s.k) try { await publicar(await cifrar(s.k, { t: "sair", id: s.id })); } catch {}
   setTimeout(() => s.clientes.forEach((c) => c.end(true)), 300);
   S = null;
@@ -170,7 +315,8 @@ async function encerrar(motivo, avisar) {
 addEventListener("resize", () => term.element && fit.fit());
 addEventListener("beforeunload", () => S && S.k && encerrar("", true));
 $("#sair").onclick = () => encerrar("Você saiu da sessão.", true);
-if (location.hash.length > 1) $("#codigo").value = decodeURIComponent(location.hash.slice(1));
+const doHash = () => { if (location.hash.length > 1 && !S) $("#codigo").value = decodeURIComponent(location.hash.slice(1)); };
+doHash(); addEventListener("hashchange", doHash);
 try { $("#nome").value = localStorage.getItem("dassh-nome") || ""; } catch {}
 $("#entrar").onsubmit = async (e) => {
   e.preventDefault(); $("#btn").disabled = true;
