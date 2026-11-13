@@ -1,7 +1,7 @@
 # DASSH Console — download
 
-Terminal em abas (Serial, SSH, PowerShell, CMD, Azure, GCP e Web/iDRAC) com evidências padronizadas,
-relatório PDF e sessão ao vivo. **DASSH IT Services.**
+Shell avançado multiprotocolo (Serial, SSH, PowerShell, CMD, Azure, GCP e Web/iDRAC) com cofre de credenciais,
+sessão compartilhada com criptografia de ponta a ponta, automação por roteiros e evidências auditáveis com relatório PDF assinado. **DASSH IT Services.**
 
 **➡ Página de instalação (passo a passo): https://claudiosirimarco.github.io/dassh-console-download/**
 
