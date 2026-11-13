@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DASSH Console — sessão ao vivo</title>
+<meta name="description" content="Acompanhe pelo navegador uma sessão compartilhada do DASSH Console, com criptografia de ponta a ponta.">
+<link rel="icon" href="img/favicon.ico">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css">
+<style>
+  :root { --fundo: #0b1015; --painel: #141d26; --borda: #22303c; --texto: #e6edf3; --suave: #93a1ad; --verde: #00c896; --aviso: #f6c86b; --erro: #ff7b72; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.5 system-ui, "Segoe UI", sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+  header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--borda); flex-wrap: wrap; }
+  header a { display: flex; align-items: center; gap: 10px; color: var(--texto); text-decoration: none; font-weight: 700; }
+  header img { width: 28px; height: 28px; }
+  #info { margin-left: auto; color: var(--suave); font-size: 13.5px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .pt { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--suave); margin-right: 6px; }
+  .pt.on { background: var(--verde); box-shadow: 0 0 10px var(--verde); }
+  main { flex: 1; display: flex; flex-direction: column; }
+  #entrar { max-width: 460px; margin: 8vh auto; padding: 28px; background: var(--painel); border: 1px solid var(--borda); border-radius: 14px; width: calc(100% - 32px); }
+  #entrar h1 { font-size: 24px; margin: 0 0 6px; }
+  #entrar p { color: var(--suave); margin: 0 0 18px; }
+  label { display: block; font-size: 13px; color: var(--suave); margin: 12px 0 6px; }
+  input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--borda); background: #0d141b; color: var(--texto); font-size: 16px; }
+  #codigo { font: 600 22px/1 ui-monospace, Consolas, monospace; letter-spacing: 2px; text-transform: uppercase; text-align: center; }
+  button { margin-top: 18px; width: 100%; padding: 13px; border: 0; border-radius: 10px; font-weight: 700; font-size: 16px; cursor: pointer;
+    background: linear-gradient(135deg, var(--verde), #00a07a); color: #04231b; }
+  button:disabled { opacity: .55; cursor: wait; }
+  button.sec { width: auto; margin: 0; padding: 7px 14px; font-size: 13.5px; background: transparent; color: var(--texto); border: 1px solid var(--borda); }
+  #msg { margin-top: 14px; min-height: 22px; font-size: 14px; color: var(--aviso); }
+  #msg.erro { color: var(--erro); }
+  .nota { font-size: 12.5px; color: var(--suave); margin-top: 18px; border-top: 1px solid var(--borda); padding-top: 14px; }
+  #tela { display: none; flex: 1; padding: 10px; background: #000; min-height: 60vh; }
+  #tela .xterm { height: 100%; }
+  #parts { color: var(--suave); }
+</style>
+</head>
+<body>
+<header>
+  <a href="./"><img src="img/logo.png" alt="">DASSH Console</a>
+  <div id="info"><span><span class="pt" id="pt"></span><span id="st">desconectado</span></span><span id="parts"></span>
+    <button class="sec" id="sair" hidden>Sair da sessão</button></div>
+</header>
+<main>
+  <form id="entrar" autocomplete="off">
+    <h1>Acompanhar sessão ao vivo</h1>
+    <p>Digite o código do convite. Quem compartilhou aprova a sua entrada e você acompanha o terminal aqui, sem instalar nada.</p>
+    <label for="codigo">Código do convite</label>
+    <input id="codigo" maxlength="14" placeholder="ABCD-EFGH-JKLM" required spellcheck="false">
+    <label for="nome">Seu nome (aparece para quem compartilhou)</label>
+    <input id="nome" maxlength="40" placeholder="Ex.: Ana — NOC" required>
+    <button id="btn" type="submit">Entrar</button>
+    <div id="msg"></div>
+    <div class="nota">🔒 Criptografia de ponta a ponta (AES-256-GCM + X25519). O servidor de transporte só vê dados cifrados;
+      a chave da sessão é entregue apenas a quem o dono aprova. No navegador você entra como <b>observador</b>.</div>
+  </form>
+  <div id="tela"></div>
+</main>
+<script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.min.js"></script>
+<script type="module">
+// Mesmo protocolo do compartilhar.py (dassh/v1): cada código = um tópico próprio -> várias sessões independentes,
+// e vários observadores por sessão (cada um com seu par X25519 e aprovação individual).
+import { x25519 } from "https://esm.sh/@noble/curves@1.6.0/ed25519";
+import { scryptAsync } from "https://esm.sh/@noble/hashes@1.5.0/scrypt";
+import { hkdf } from "https://esm.sh/@noble/hashes@1.5.0/hkdf";
+import { sha256 } from "https://esm.sh/@noble/hashes@1.5.0/sha256";
+
+const SERVIDORES = ["wss://broker.emqx.io:8084/mqtt", "wss://test.mosquitto.org:8081/mqtt"];
+const ALFA = /[^A-Z0-9]/g, te = new TextEncoder(), td = new TextDecoder();
+const $ = (s) => document.querySelector(s);
+const b64 = (u) => btoa(String.fromCharCode(...u));
+const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+const hex = (u) => [...u].map((x) => x.toString(16).padStart(2, "0")).join("");
+
+async function fluxo(dados, Stream) {
+  return new Uint8Array(await new Response(new Blob([dados]).stream().pipeThrough(new Stream("deflate"))).arrayBuffer());
+}
+async function cifrar(chave, obj) {
+  const k = await crypto.subtle.importKey("raw", chave, "AES-GCM", false, ["encrypt"]);
+  const n = crypto.getRandomValues(new Uint8Array(12));
+  const c = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: n }, k, await fluxo(te.encode(JSON.stringify(obj)), CompressionStream)));
+  const out = new Uint8Array(12 + c.length); out.set(n); out.set(c, 12); return out;
+}
+async function decifrar(chave, blob) {
+  const k = await crypto.subtle.importKey("raw", chave, "AES-GCM", false, ["decrypt"]);
+  const p = await crypto.subtle.decrypt({ name: "AES-GCM", iv: blob.slice(0, 12) }, k, blob.slice(12));
+  return JSON.parse(td.decode(await fluxo(new Uint8Array(p), DecompressionStream)));
+}
+
+let S = null;   // estado da sessão atual
+const term = new Terminal({ fontFamily: "Consolas, 'Cascadia Mono', monospace", fontSize: 14, disableStdin: true, scrollback: 5000,
+  theme: { background: "#000000" }, convertEol: false });
+const fit = new FitAddon.FitAddon(); term.loadAddon(fit);
+
+function status(txt, on) { $("#st").textContent = txt; $("#pt").classList.toggle("on", !!on); }
+function aviso(txt, erro) { $("#msg").textContent = txt; $("#msg").classList.toggle("erro", !!erro); }
+
+async function entrar(codigoDigitado, nome) {
+  const codigo = codigoDigitado.toUpperCase().replace(ALFA, "");
+  if (codigo.length !== 12) throw new Error("O código tem 12 caracteres (ex.: ABCD-EFGH-JKLM).");
+  aviso("Preparando a chave da sessão…");
+  const portaria = await scryptAsync(te.encode(codigo), te.encode("dassh-share-v1"), { N: 2 ** 15, r: 8, p: 1, dkLen: 32 });
+  const topico = "dassh/v1/" + hex(sha256(te.encode("topico|" + codigo))).slice(0, 40);
+  const priv = x25519.utils.randomPrivateKey();
+  const id = hex(crypto.getRandomValues(new Uint8Array(5)));
+  S = { codigo, topico, portaria, priv, id, k: null, wrap: null, clientes: [], vivo: true, nome };
+
+  aviso("Conectando ao servidor de compartilhamento…");
+  // conecta em todos os servidores (o dono usa o primeiro que responder; assim não importa qual foi)
+  await Promise.any(SERVIDORES.map((url) => new Promise((ok, falha) => {
+    const c = mqtt.connect(url, { clientId: "dassh-web-" + hex(crypto.getRandomValues(new Uint8Array(6))), reconnectPeriod: 2000, connectTimeout: 12000 });
+    c.on("connect", () => { c.subscribe(topico + "/h", { qos: 1 }); if (!S.clientes.includes(c)) S.clientes.push(c); ok(c); });
+    c.on("message", (_t, m) => receber(new Uint8Array(m)));
+    c.on("error", falha);
+    setTimeout(() => falha(new Error("tempo esgotado")), 13000);
+  }))).catch(() => { throw new Error("Sem acesso ao servidor de compartilhamento. Verifique a internet/firewall."); });
+
+  await publicar(await cifrar(portaria, { t: "entrar", id, nome, pub: b64(x25519.getPublicKey(priv)) }));
+  status("aguardando aprovação…");
+  aviso("Pedido enviado. Aguarde quem compartilhou aprovar a sua entrada.");
+  const inicio = Date.now();
+  S.timer = setInterval(async () => {
+    if (!S || !S.vivo) return;
+    if (S.k) publicar(await cifrar(S.k, { t: "ping", id: S.id }));
+    else if (Date.now() - inicio > 180000) encerrar("Quem compartilhou não respondeu ao pedido de entrada.");
+  }, 5000);
+}
+async function publicar(blob) { for (const c of S.clientes) if (c.connected) c.publish(S.topico + "/c", blob, { qos: 1 }); }
+
+async function receber(blob) {
+  if (!S || !S.vivo) return;
+  let msg = null;
+  if (S.k) msg = await decifrar(S.k, blob).catch(() => null);
+  if (!msg) msg = await decifrar(S.portaria, blob).catch(() => null);
+  if (!msg || (msg.para && msg.para !== S.id)) return;
+  const t = msg.t;
+  if (t === "aprovado" || t === "rechave") {
+    if (t === "aprovado") S.wrap = hkdf(sha256, x25519.getSharedSecret(S.priv, unb64(msg.hpub)), undefined, te.encode("dassh-share-wrap"), 32);
+    if (!S.wrap) return;
+    S.k = unb64((await decifrar(S.wrap, unb64(msg.k))).k);
+    if (t === "aprovado") abrirTela();
+  } else if (t === "negado") encerrar("Quem compartilhou recusou a entrada.");
+  else if (t === "out") term.write(msg.d || "");
+  else if (t === "snap") { term.reset(); term.write(msg.d || ""); }
+  else if (t === "estado") {
+    const ps = msg.participantes || [];
+    $("#parts").textContent = "👥 " + ps.map((p) => p.nome + (p.papel === "dono" ? " (dono)" : "")).join(", ");
+  } else if (t === "fim") encerrar("Quem compartilhou encerrou a sessão.");
+}
+
+function abrirTela() {
+  $("#entrar").style.display = "none"; $("#tela").style.display = "block"; $("#sair").hidden = false;
+  status("ao vivo · " + S.codigo.replace(/(.{4})(.{4})(.{4})/, "$1-$2-$3"), true);
+  if (!term.element) term.open($("#tela"));
+  fit.fit();
+}
+async function encerrar(motivo, avisar) {
+  if (!S) return;
+  const s = S; s.vivo = false; clearInterval(s.timer);
+  if (avisar && s.k) try { await publicar(await cifrar(s.k, { t: "sair", id: s.id })); } catch {}
+  setTimeout(() => s.clientes.forEach((c) => c.end(true)), 300);
+  S = null;
+  $("#entrar").style.display = ""; $("#sair").hidden = true; $("#parts").textContent = "";
+  status("desconectado"); aviso(motivo || "", !avisar); $("#btn").disabled = false;
+}
+
+addEventListener("resize", () => term.element && fit.fit());
+addEventListener("beforeunload", () => S && S.k && encerrar("", true));
+$("#sair").onclick = () => encerrar("Você saiu da sessão.", true);
+if (location.hash.length > 1) $("#codigo").value = decodeURIComponent(location.hash.slice(1));
+try { $("#nome").value = localStorage.getItem("dassh-nome") || ""; } catch {}
+$("#entrar").onsubmit = async (e) => {
+  e.preventDefault(); $("#btn").disabled = true;
+  const nome = $("#nome").value.trim().slice(0, 40);
+  try { localStorage.setItem("dassh-nome", nome); } catch {}
+  try { await entrar($("#codigo").value, nome); }
+  catch (err) { if (S) { S.clientes.forEach((c) => c.end(true)); S = null; } aviso(err.message || String(err), true); $("#btn").disabled = false; status("desconectado"); }
+};
+</script>
+</body>
+</html>
