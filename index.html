@@ -100,6 +100,8 @@
   .hero h1 .grad { background: linear-gradient(90deg, var(--verde), var(--verde-cl)); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .selos { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 22px auto 0; max-width: 760px; }
   .selos span { font-size: 13px; color: var(--suave); border: 1px solid var(--borda); background: var(--painel); border-radius: 999px; padding: 5px 12px; }
+  .contador { color: var(--verde-cl) !important; font-size: 14px !important; }
+  .contador b { color: var(--texto); }
 </style>
 </head>
 <body>
@@ -127,6 +129,7 @@
     <a class="btn" href="https://github.com/ClaudioSirimarco/dassh-console-download/releases/latest/download/DASSH-Console-Portatil.zip">Versão portátil <small>.zip</small></a>
   </div>
   <div class="selos"><span>🔒 AES-256-GCM + X25519</span><span>🧾 SHA-256 em cada evidência</span><span>✍️ PDF com assinatura digital</span><span>📐 ISO/IEC 27037</span></div>
+  <p class="req contador" id="contador" hidden></p>
   <p class="req">Windows 10 ou 11 (64 bits) · não precisa ser administrador · versão de testes</p>
 </div></section>
 
@@ -233,6 +236,17 @@
   };
   if (calmo) el.textContent = frases[0]; else setTimeout(passo, 600);
 })();
+</script>
+<script>
+// total de downloads (todas as versões), direto da API pública do GitHub — sem rastrear ninguém
+fetch("https://api.github.com/repos/ClaudioSirimarco/dassh-console-download/releases?per_page=100")
+  .then((r) => r.json()).then((rels) => {
+    let n = 0, v = "";
+    rels.forEach((r, i) => { if (i === 0) v = r.tag_name; (r.assets || []).forEach((a) => (n += a.download_count || 0)); });
+    if (!n) return;
+    const el = document.getElementById("contador");
+    el.innerHTML = `⬇ <b>${n.toLocaleString("pt-BR")}</b> downloads · versão atual <b>${v}</b>`; el.hidden = false;
+  }).catch(() => {});
 </script>
 </body>
 </html>
