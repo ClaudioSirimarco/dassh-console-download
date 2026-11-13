@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DASSH Console — opere qualquer infraestrutura, prove cada comando</title>
+<title>DASSH Console — toda a sua infraestrutura em um só shell</title>
 <meta name="description" content="DASSH Console: shell avançado multiprotocolo (Serial, SSH, PowerShell, nuvem, iDRAC/iLO) com cofre de credenciais, sessão compartilhada com criptografia de ponta a ponta, automação e evidências auditáveis.">
 <link rel="icon" href="img/favicon.ico">
 <style>
@@ -21,7 +21,7 @@
     border-bottom: 1px solid var(--borda); }
   header.topo .cont { display: flex; align-items: center; justify-content: space-between; height: 62px; }
   .marca { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--texto); font-weight: 700; }
-  .marca img { width: 32px; height: 32px; }
+  .marca .tlogo { width: 32px; height: 32px; overflow: visible; transform-origin: 50% 50%; } #tnome { min-width: 8.2em; font-family: ui-monospace, Consolas, monospace; letter-spacing: .3px; }
   nav a { color: var(--suave); text-decoration: none; margin-left: 22px; font-size: 14.5px; }
   nav a:hover { color: var(--texto); }
   @media (max-width: 720px) { nav { display: none; } }
@@ -106,7 +106,13 @@
 </head>
 <body>
 <header class="topo"><div class="cont">
-  <a class="marca" href="#"><img src="img/logo.png" alt="">DASSH Console</a>
+  <a class="marca" href="#" aria-label="DASSH Console"><svg class="tlogo" id="tlogo" viewBox="0 0 100 100" aria-hidden="true">
+    <rect x="6" y="6" width="88" height="88" rx="22" fill="url(#hlg)"/>
+    <polyline points="24,30 46,50 24,70" fill="none" stroke="#fff" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect id="tcur" x="52" y="63.5" width="24" height="9" rx="4.5" fill="#fff"/>
+    <circle cx="73" cy="27" r="13" fill="#fff"/>
+    <polyline points="66.5,27.5 71.5,32.5 80,21.5" fill="none" stroke="#004e40" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg><span id="tnome" aria-hidden="true"></span></a>
   <nav><a href="#instalar">Instalar</a><a href="#recursos">Recursos</a><a href="#convite">Recebi um convite</a><a href="ao-vivo.html">Assistir ao vivo</a><a href="#duvidas">Dúvidas</a></nav>
 </div></header>
 
@@ -120,7 +126,7 @@
     <polyline points="66.5,27.5 71.5,32.5 80,21.5" fill="none" stroke="#004e40" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>
   <div><div class="prompt" aria-hidden="true"><span class="ps">dassh@ops:~$</span> <span id="digita"></span><i id="caret"></i></div></div>
-  <h1>Opere qualquer infraestrutura.<br><span class="grad">Prove cada comando.</span></h1>
+  <h1>Toda a sua infraestrutura em um só shell.<br><span class="grad">Cada comando registrado e auditável.</span></h1>
   <p class="sub">O DASSH Console é o shell profissional que une <b>Serial, SSH, PowerShell, Cloud (Azure e Google Cloud) e iDRAC/iLO</b>
     em uma só plataforma — com <b>cofre de credenciais</b>, <b>sessão compartilhada com criptografia de ponta a ponta</b>,
     automações por fabricante e <b>evidências com valor de auditoria</b>, do primeiro comando ao relatório assinado.</p>
@@ -212,13 +218,22 @@
   const el = document.getElementById("digita"); if (!cur || !cur.animate) return;
   const k = [{ opacity: 1 }, { opacity: 1, offset: 0.5 }, { opacity: 0, offset: 0.5 }, { opacity: 0 }], o = { duration: 1000, iterations: Infinity };
   const anims = [cur.animate(k, o), car.animate(k, o)];
+  const tcur = document.getElementById("tcur"), tlogo = document.getElementById("tlogo"), tnome = document.getElementById("tnome");
+  const topo = [tcur.animate(k, o)];
   const calmo = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const brilho = (a) => "drop-shadow(0 4px " + (8 + a * 18) + "px rgba(0,200,150," + (0.3 + a * 0.45) + "))";
   if (!calmo) anims.push(logo.animate([
     { transform: "scale(1)", filter: brilho(0) }, { transform: "scale(1.10)", filter: brilho(1), offset: 0.08 },
     { transform: "scale(1)", filter: brilho(0.2), offset: 0.18 }, { transform: "scale(1.06)", filter: brilho(0.7), offset: 0.26 },
     { transform: "scale(1)", filter: brilho(0), offset: 0.42 }, { transform: "scale(1)", filter: brilho(0) }], Object.assign({ easing: "ease-out" }, o)));
-  const zera = () => anims.forEach((a) => (a.currentTime = 0));   // tudo no mesmo compasso
+  if (!calmo) topo.push(tlogo.animate([
+    { transform: "scale(1)" }, { transform: "scale(1.12)", offset: 0.08 }, { transform: "scale(1)", offset: 0.18 },
+    { transform: "scale(1.07)", offset: 0.26 }, { transform: "scale(1)", offset: 0.42 }, { transform: "scale(1)" }], Object.assign({ easing: "ease-out" }, o)));
+  // "DASSH Console" se digita no topo (uma vez), como no app
+  const marca = "DASSH Console";
+  if (calmo) tnome.textContent = marca;
+  else { let j = 0; const dig = () => { tnome.textContent = marca.slice(0, ++j); if (j < marca.length) setTimeout(dig, 75 + Math.random() * 50); }; setTimeout(dig, 300); }
+  const zera = () => anims.concat(topo).forEach((a) => (a.currentTime = 0));   // tudo no mesmo compasso
   const frases = ["connect --serial COM3 --vault", "share --live --e2e", "run coleta --vendor huawei --all-pages", "evidence --sha256 --pdf --sign"];
   let f = 0, i = 0, apagando = false;
   const passo = () => {
