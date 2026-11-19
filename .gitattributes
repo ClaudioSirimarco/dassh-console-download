@@ -1,4 +1,0 @@
-# Arquivos com assinatura de integridade (SRI) nao podem ter o fim de linha convertido
-app/vendor/** -text
-app/ponte-web.js -text
-app/ao-vivo-ui.js -text

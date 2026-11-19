@@ -1,85 +1,11 @@
 <!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Status — DASSH Console</title>
-<meta name="description" content="Estado do serviço DASSH Console (placeholder).">
-
-<link rel="icon" href="../img/favicon.ico">
-<!-- pwa:inicio -->
-<link rel="manifest" href="../manifest.webmanifest">
-<link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
-<meta name="theme-color" content="#0d1117">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="DASSH">
-<!-- pwa:fim -->
-<style>
-:root{--fundo:#0b1015;--fundo2:#10171e;--painel:#141d26;--borda:#22303c;--texto:#e6edf3;--suave:#93a1ad;--verde:#00c896;--verde-cl:#5ee0b5;--aviso:#f6c86b;--raio:14px}
-*{box-sizing:border-box}
-body{margin:0;background:var(--fundo);color:var(--texto);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif}
-a{color:var(--verde-cl)}
-.cont{max-width:860px;margin:0 auto;padding:0 20px}
-header.topo{position:sticky;top:0;z-index:5;background:rgba(11,16,21,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--borda)}
-header.topo .cont{max-width:1080px;display:flex;align-items:center;justify-content:space-between;min-height:62px;gap:12px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
-.marca{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--texto);font-weight:700;font-family:ui-monospace,Consolas,monospace}
-.marca svg{width:30px;height:30px}
-nav.menu{display:flex;flex-wrap:wrap;gap:4px 18px}
-nav.menu a{color:var(--suave);text-decoration:none;font-size:14.5px}
-nav.menu a:hover,nav.menu a[aria-current]{color:var(--texto)}
-nav.menu a[aria-current]{border-bottom:2px solid var(--verde)}
-nav.indice{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0 0 10px}
-main{padding:44px 0 56px}
-h1{font-size:clamp(28px,5vw,40px);line-height:1.15;margin:0 0 10px;letter-spacing:-.4px}
-h2{font-size:clamp(20px,3vw,25px);margin:38px 0 8px}
-h3{font-size:18px;margin:22px 0 6px}
-.sub{color:var(--suave);font-size:18px;margin:0 0 24px}
-p,li{color:#c9d3db}
-li{margin:6px 0}
-kbd,code{font:13px Consolas,monospace;background:#0b1218;border:1px solid var(--borda);border-radius:6px;padding:1px 7px;color:var(--texto);overflow-wrap:anywhere}
-.cartao{background:var(--painel);border:1px solid var(--borda);border-radius:var(--raio);padding:20px 22px;margin:18px 0}
-.cartao h3{margin-top:0}
-.aviso{border-left:4px solid var(--aviso);background:#1b1a12;border-radius:8px;padding:14px 18px;margin:20px 0;color:#e9dcb4}
-.aviso b{color:var(--aviso)}
-.rascunho{border:2px dashed var(--aviso);background:#1b1a12;border-radius:10px;padding:14px 18px;margin:0 0 26px;color:var(--aviso);font-weight:600}
-.btn{display:inline-flex;align-items:center;gap:10px;padding:13px 24px;border-radius:12px;font-weight:650;text-decoration:none;font-size:16px;border:1px solid var(--borda);color:var(--texto);background:var(--painel)}
-.btn:hover{border-color:var(--verde)}
-.btn.prim{background:linear-gradient(135deg,var(--verde),#00a07a);color:#04231b;border:0;box-shadow:0 10px 30px rgba(0,200,150,.25)}
-.botoes{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}
-.selo{display:inline-block;font-size:12.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#04231b;background:var(--aviso);border-radius:999px;padding:3px 12px;margin-bottom:12px}
-.grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
-footer{padding:30px 0 40px;text-align:center;color:var(--suave);font-size:13.5px;border-top:1px solid var(--borda)}
-footer a{margin:0 8px;white-space:nowrap;display:inline-block;line-height:2}
-</style>
-<link rel="stylesheet" href="../site.css">
-</head>
-<body>
-<header class="topo"><div class="cont">
-  <a class="marca" href="../"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c896"/><stop offset="1" stop-color="#004e40"/></linearGradient></defs><rect x="6" y="6" width="88" height="88" rx="22" fill="url(#g)"/><polyline points="24,30 46,50 24,70" fill="none" stroke="#fff" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="52" y="63.5" width="24" height="9" rx="4.5" fill="#fff"/><circle cx="73" cy="27" r="13" fill="#fff"/><polyline points="66.5,27.5 71.5,32.5 80,21.5" fill="none" stroke="#004e40" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>DASSH Console</span></a>
-  <nav class="menu"><a href="../baixar/">Baixar</a><a href="../docs/">Documentação</a><a href="../ao-vivo.html">Assistir ao vivo</a><a href="../status/" aria-current="page">Status</a></nav>
-</div></header>
-<main><div class="cont">
-
-<span class="selo">Em construção</span>
-<h1>Status do serviço</h1>
-<p class="sub">Hoje não existe um serviço DASSH na nuvem para monitorar, então esta página ainda não mostra medições.</p>
-<div class="cartao"><h3>O que existe hoje</h3>
-<ul>
-  <li>O aplicativo roda no seu computador e não depende de um servidor DASSH.</li>
-  <li>Esta página e os downloads dependem do GitHub (Pages e Releases): <a href="https://www.githubstatus.com/">githubstatus.com</a>.</li>
-  <li>O compartilhamento ao vivo usa um serviço de mensageria público de terceiros; se ele ficar fora do ar, o compartilhamento é afetado.</li>
-</ul></div>
-<p>Se a plataforma web for lançada, esta página mostrará a disponibilidade do serviço e o histórico de incidentes.</p>
-<p><a class="btn" href="https://github.com/ClaudioSirimarco/dassh-console-download/releases/latest">Ver a versão mais recente</a></p>
-
-</div></main>
-<footer><div class="cont"><a href="../baixar/">Baixar</a><a href="../docs/">Docs</a><a href="../agente/">Agente local</a><a href="../app/">Plataforma web</a><a href="../status/">Status</a><a href="../privacidade/">Privacidade</a><a href="../termos/">Termos</a><br>DASSH Console · DASSH IT Services</div></footer>
-<!-- app-mobile:inicio -->
-<nav class="bnav" aria-label="Navegação principal"><a href="../"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v11h13V9"/><path d="M10 20v-5.5h4V20"/></svg><span>Início</span></a><a href="../baixar/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10.5 5 5 5-5"/><path d="M5 20h14"/></svg><span>Baixar</span></a><a href="../docs/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3h8l4 4v14h-12z"/><path d="M14 3v4.5h4.5"/><path d="M9.5 12.5h6M9.5 16.5h6"/></svg><span>Docs</span></a><a href="../ao-vivo.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.4"/><path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4"/></svg><span>Ao vivo</span></a><a href="#mais" id="bn-mais" role="button" aria-controls="mais" aria-expanded="false" aria-haspopup="true" class="ativo" data-ativo="1"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18.5" cy="12" r="1.3"/></svg><span>Mais</span></a></nav>
-<div class="bn-folha" id="mais" role="dialog" aria-label="Mais opções"><div class="bn-tit"><span>Mais</span><a class="bn-fechar" href="#" aria-label="Fechar">×</a></div><ul><li><a href="../agente/"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9.5 9.5h5v5h-5zM9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></svg><span>Agente local</span></a></li><li><a href="../app/"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12.5" rx="2"/><path d="M8 20.5h8M12 16.5v4M7 8.5l2.5 2-2.5 2M11.5 12.5h4"/></svg><span>Plataforma web</span></a></li><li><a href="../status/" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2.5-6 4 12 2.5-6H21"/></svg><span>Status</span></a></li><li><a href="../privacidade/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5.5c0 4.5 3 7.8 7 9.5 4-1.7 7-5 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span>Privacidade</span></a></li><li><a href="../termos/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3h8l4 4v14h-12z"/><path d="M14 3v4.5h4.5"/><path d="M9.5 11.5h6M9.5 15h6M9.5 18.5h3.5"/></svg><span>Termos de uso</span></a></li><li><a href="https://github.com/ClaudioSirimarco/dassh-console-download/releases"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12.5V4.5h8l9 9-8 8z"/><circle cx="8" cy="9" r="1.4"/></svg><span>Todas as versões</span><small>GitHub ↗</small></a></li></ul></div><div class="bn-veu" id="bn-veu" aria-hidden="true"></div>
-<script>(()=>{const b=document.getElementById("bn-mais"),f=document.getElementById("mais"),v=document.getElementById("bn-veu");if(!b||!f||!v)return;const abrir=(s)=>{f.classList.toggle("aberta",s);v.classList.toggle("aberto",s);b.setAttribute("aria-expanded",String(s));b.classList.toggle("ativo",s||b.dataset.ativo==="1");if(s){const a=f.querySelector("li a");if(a)a.focus({preventScroll:true});}};b.addEventListener("click",(e)=>{e.preventDefault();abrir(!f.classList.contains("aberta"));});v.addEventListener("click",()=>abrir(false));f.querySelector(".bn-fechar").addEventListener("click",(e)=>{e.preventDefault();abrir(false);b.focus();});document.addEventListener("keydown",(e)=>{if(e.key==="Escape"&&f.classList.contains("aberta")){abrir(false);b.focus();}});if(location.hash==="#mais"){history.replaceState(null,"",location.pathname+location.search);abrir(true);}})();</script>
-<!-- app-mobile:fim -->
-</body>
-</html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DASSH Console — novo endereço</title>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://claudiosirimarco.github.io/dassh/status/">
+<meta http-equiv="refresh" content="2; url=https://claudiosirimarco.github.io/dassh/status/">
+<script>location.replace("https://claudiosirimarco.github.io/dassh/status/" + location.search + location.hash);</script>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0d1117;color:#e6edf3;font:15px/1.5 'Segoe UI',system-ui,sans-serif;padding:16px;text-align:center}a{color:#3fb9a0}</style>
+</head><body><main><h1 style="font-size:20px">O DASSH Console mudou de endereço</h1>
+<p>Levando você para <a href="https://claudiosirimarco.github.io/dassh/status/">claudiosirimarco.github.io/dassh/status/</a>…</p></main></body></html>

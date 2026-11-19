@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://claudiosirimarco.github.io/dassh-console-download/sitemap.xml
